@@ -12,14 +12,15 @@ defmodule FunnelHttp.Mixfile do
   #
   # Type `mix help compile.app` for more information
   def application do
-    [applications: [:cowboy, :plug],
+    [applications: [:cowboy, :plug, :funnel],
      mod: {FunnelHttp, []}]
   end
 
   defp deps do
     [
       {:cowboy, github: "extend/cowboy"},
-      {:plug, "~> 0.4.2"}
+      {:plug, "~> 0.4.2"},
+      {:funnel, github: "AF83/funnel", branch: "undynamo"}
     ]
   end
 end
