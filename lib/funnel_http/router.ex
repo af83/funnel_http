@@ -9,7 +9,9 @@ defmodule FunnelHttp.Router do
     token = Funnel.register conn
     {:ok, response} = JSEX.encode([token: token])
 
-    send_resp(conn, 200, response)
+    conn
+      |> put_resp_content_type("application/json")
+      |> send_resp(201, response)
   end
 
   match _ do
