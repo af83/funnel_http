@@ -5,8 +5,11 @@ defmodule FunnelHttp.Router do
   plug :match
   plug :dispatch
 
-  get "/hello" do
-    send_resp(conn, 200, "world")
+  get "/register" do
+    token = Funnel.register conn
+    {:ok, response} = JSEX.encode([token: token])
+
+    send_resp(conn, 200, response)
   end
 
   match _ do
