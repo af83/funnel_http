@@ -18,7 +18,7 @@ defmodule FunnelHttp.Router do
     {:ok, conn}
       |> authenticate
       |> set_content_type
-      |> set_response(201, "response")
+      |> set_response(:index_creation)
   end
 
   match _ do
@@ -42,11 +42,31 @@ defmodule FunnelHttp.Router do
     send_resp(conn, 400, response)
   end
 
+  defp set_response({:ok, conn}, :index_creation) do
+    response = case req_body(conn) do
+      ""   -> Funnel.Index.create
+      body -> Funnel.Index.create(body)
+    end
+
+    %{body: body, headers: _headers, status_code: status_code} = response
+    set_response({:ok, conn}, status_code, body)
+  end
+
+  defp set_response({:unauthenticated, conn}, _method) do
+    {:ok, response} = JSEX.encode([error: "Unauthenticated"])
+    send_resp(conn, 400, response)
+  end
+
   defp authenticate({:ok, conn}) do
     conn = Plug.Conn.fetch_params(conn)
     case conn.params["token"] do
       nil   -> {:unauthenticated, conn}
       token -> {:ok, conn}
     end
+  end
+
+  defp req_body(conn) do
+    {_, %{req_body: req_body}} = conn.adapter
+    req_body
   end
 end
