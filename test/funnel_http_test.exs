@@ -4,6 +4,17 @@ defmodule FunnelHttpTest do
 
   @opts FunnelHttp.Router.init([])
 
+  test "404" do
+    conn = conn(:post, "/ohai")
+    conn = FunnelHttp.Router.call(conn, @opts)
+
+    {:ok, response} = JSEX.decode(conn.resp_body)
+
+    assert conn.state == :sent
+    assert conn.status == 404
+    assert response["error"] == "Not found"
+  end
+
   test "returns a token in json" do
     conn = conn(:post, "/register")
     conn = FunnelHttp.Router.call(conn, @opts)

@@ -19,7 +19,9 @@ defmodule FunnelHttp.Router do
   end
 
   match _ do
-    send_resp(conn, 404, "oops")
+    {:ok, conn}
+      |> set_content_type
+      |> set_response(:not_found)
   end
 
   defp set_content_type({:ok, conn}) do
@@ -53,6 +55,11 @@ defmodule FunnelHttp.Router do
 
     %{body: body, headers: _headers, status_code: status_code} = response
     set_response({:ok, conn}, status_code, body)
+  end
+
+  defp set_response({:ok, conn}, :not_found) do
+    {:ok, response} = JSEX.encode([error: "Not found"])
+    send_resp(conn, 404, response)
   end
 
   defp set_response({:unauthenticated, conn}, _method) do
