@@ -6,12 +6,9 @@ defmodule FunnelHttp.Router do
   plug :dispatch
 
   post "/register" do
-    token = Funnel.register conn
-    {:ok, response} = JSEX.encode([token: token])
-
     {:ok, conn}
       |> set_content_type
-      |> set_response(201, response)
+      |> set_response(:register)
   end
 
   post "/index" do
@@ -40,6 +37,12 @@ defmodule FunnelHttp.Router do
   defp set_response({:unauthenticated, conn}, _status, _response) do
     {:ok, response} = JSEX.encode([error: "Unauthenticated"])
     send_resp(conn, 400, response)
+  end
+
+  defp set_response({:ok, conn}, :register) do
+    token = Funnel.register conn
+    {:ok, response} = JSEX.encode([token: token])
+    set_response({:ok, conn}, 201, response)
   end
 
   defp set_response({:ok, conn}, :index_creation) do
