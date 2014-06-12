@@ -9,12 +9,44 @@ defmodule FunnelHttp.Router do
     token = Funnel.register conn
     {:ok, response} = JSEX.encode([token: token])
 
-    conn
-      |> put_resp_content_type("application/json")
-      |> send_resp(201, response)
+    {:ok, conn}
+      |> set_content_type
+      |> set_response(201, response)
+  end
+
+  post "/index" do
+    {:ok, conn}
+      |> authenticate
+      |> set_content_type
+      |> set_response(201, "response")
   end
 
   match _ do
     send_resp(conn, 404, "oops")
+  end
+
+  defp set_content_type({:ok, conn}) do
+    {:ok, put_resp_content_type(conn, "application/json")}
+  end
+
+  defp set_content_type({:unauthenticated, conn}) do
+    {:unauthenticated, put_resp_content_type(conn, "application/json")}
+  end
+
+  defp set_response({:ok, conn}, status, response) do
+    send_resp(conn, status, response)
+  end
+
+  defp set_response({:unauthenticated, conn}, _status, _response) do
+    {:ok, response} = JSEX.encode([error: "Unauthenticated"])
+    send_resp(conn, 400, response)
+  end
+
+  defp authenticate({:ok, conn}) do
+    conn = Plug.Conn.fetch_params(conn)
+    case conn.params["token"] do
+      nil   -> {:unauthenticated, conn}
+      token -> {:ok, conn}
+    end
   end
 end
