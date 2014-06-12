@@ -5,7 +5,7 @@ defmodule FunnelHttp.Router do
   plug :match
   plug :dispatch
 
-  get "/register" do
+  post "/register" do
     token = Funnel.register conn
     {:ok, response} = JSEX.encode([token: token])
 
