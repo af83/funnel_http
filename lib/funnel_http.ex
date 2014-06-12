@@ -3,9 +3,9 @@ defmodule FunnelHttp do
 
   # See http://elixir-lang.org/docs/stable/Application.html
   # for more information on OTP Applications
-  def start(_type, _args) do
-    IO.puts "Running MyPlug with Cowboy on http://localhost:4000"
-    Plug.Adapters.Cowboy.http FunnelHttp.Router, []
+  def start(_type, args) do
+    IO.puts "Running Funnel with Cowboy on http://localhost:4000"
+    Plug.Adapters.Cowboy.http FunnelHttp.Router, args
 
     import Supervisor.Spec, warn: false
 
