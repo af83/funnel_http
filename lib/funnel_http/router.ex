@@ -5,6 +5,12 @@ defmodule FunnelHttp.Router do
   plug :match
   plug :dispatch
 
+  get "/status" do
+    {:ok, conn}
+      |> set_content_type
+      |> set_response(:status)
+  end
+
   post "/register" do
     {:ok, conn}
       |> set_content_type
@@ -39,6 +45,12 @@ defmodule FunnelHttp.Router do
   defp set_response({:unauthenticated, conn}, _status, _response) do
     {:ok, response} = JSEX.encode([error: "Unauthenticated"])
     send_resp(conn, 400, response)
+  end
+
+  defp set_response({:ok, conn}, :status) do
+    response = Funnel.Es.get("/")
+    %{body: body, headers: _headers, status_code: status_code} = response
+    set_response({:ok, conn}, status_code, body)
   end
 
   defp set_response({:ok, conn}, :register) do

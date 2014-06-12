@@ -15,6 +15,16 @@ defmodule FunnelHttpTest do
     assert response["error"] == "Not found"
   end
 
+  test "status" do
+    conn = conn(:get, "/status")
+    conn = FunnelHttp.Router.call(conn, @opts)
+    {:ok, response} = JSEX.decode(conn.resp_body)
+
+    assert conn.state == :sent
+    assert conn.status == 200
+    assert response["status"] == 200
+  end
+
   test "returns a token in json" do
     conn = conn(:post, "/register")
     conn = FunnelHttp.Router.call(conn, @opts)
