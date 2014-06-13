@@ -93,7 +93,7 @@ defmodule FunnelHttp.Router do
     conn = Plug.Conn.fetch_params(conn)
     case conn.params["token"] do
       nil   -> {:unauthenticated, conn}
-      token -> {:ok, conn}
+      token -> {:ok, %{conn | assigns: Map.put(conn.assigns, :token, token)}}
     end
   end
 
