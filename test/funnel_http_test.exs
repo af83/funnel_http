@@ -59,4 +59,18 @@ defmodule FunnelHttpTest do
     assert response["index_id"] != nil
     Funnel.Es.destroy("funnel")
   end
+
+  test "allow to create an index with token, and settings forwarding" do
+    Funnel.Es.destroy("funnel")
+    settings = '{"settings" : {"number_of_shards" : 1},"mappings" : {"type1" : {"_source" : { "enabled" : false },"properties" : {"field1" : { "type" : "string", "index" : "not_analyzed" }}}}}' |> IO.iodata_to_binary
+    conn = conn(:post, "/index?token=index_creation", settings, headers: [{"content-type", "application/json"}])
+    conn = FunnelHttp.Router.call(conn, @opts)
+
+    {:ok, response} = JSEX.decode(conn.resp_body)
+
+    assert conn.state == :sent
+    assert conn.status == 200
+    assert response["index_id"] != nil
+    Funnel.Es.destroy("funnel")
+  end
 end
