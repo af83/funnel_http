@@ -3,10 +3,7 @@ defmodule FunnelHttp do
 
   # See http://elixir-lang.org/docs/stable/Application.html
   # for more information on OTP Applications
-  def start(_type, args) do
-    IO.puts "Running Funnel with Cowboy on http://localhost:4000"
-    Plug.Adapters.Cowboy.http FunnelHttp.Router, args
-
+  def start(_type, _args) do
     import Supervisor.Spec, warn: false
 
     children = [
@@ -18,5 +15,11 @@ defmodule FunnelHttp do
     # for other strategies and supported options
     opts = [strategy: :one_for_one, name: FunnelHttp.Supervisor]
     Supervisor.start_link(children, opts)
+  end
+
+  def run(opts) do
+    port = Keyword.get(opts, :port, 4000)
+    IO.puts "Running Funnel with Cowboy on http://localhost:#{port}"
+    Plug.Adapters.Cowboy.http FunnelHttp.Router, [], opts
   end
 end

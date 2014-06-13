@@ -13,7 +13,14 @@ defmodule Mix.Tasks.Server do
 
   """
   def run(args) do
+    opts = OptionParser.parse(args, aliases: [p: :port]) |> elem(0)
+
+    if opts[:port] do
+      opts = Keyword.update!(opts, :port, &binary_to_integer(&1))
+    end
+
     Mix.Task.run "app.start", args
+    FunnelHttp.run(opts)
 
     unless Code.ensure_loaded?(IEx) && IEx.started? do
       :timer.sleep(:infinity)
