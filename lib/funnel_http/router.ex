@@ -39,12 +39,8 @@ defmodule FunnelHttp.Router do
       |> set_response(:not_found)
   end
 
-  defp set_content_type({:ok, conn}) do
-    {:ok, put_resp_content_type(conn, "application/json")}
-  end
-
-  defp set_content_type({:unauthenticated, conn}) do
-    {:unauthenticated, put_resp_content_type(conn, "application/json")}
+  defp set_content_type({result, conn}) do
+    {result, put_resp_content_type(conn, "application/json")}
   end
 
   defp set_response({:ok, conn}, status, response) do
