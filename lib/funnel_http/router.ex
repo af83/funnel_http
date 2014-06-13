@@ -65,7 +65,7 @@ defmodule FunnelHttp.Router do
       body -> Funnel.Index.create(body)
     end
 
-    %{body: body, headers: _headers, status_code: status_code} = response
+    {status_code, body} = response
     set_response({:ok, conn}, status_code, body)
   end
 
