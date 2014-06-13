@@ -53,24 +53,58 @@ defmodule FunnelHttpTest do
     conn = FunnelHttp.Router.call(conn, @opts)
 
     {:ok, response} = JSEX.decode(conn.resp_body)
+    index_id = response["index_id"]
 
     assert conn.state == :sent
     assert conn.status == 200
-    assert response["index_id"] != nil
-    Funnel.Es.destroy("funnel")
+    assert index_id != nil
+    Funnel.Es.destroy(index_id)
   end
 
   test "allow to create an index with token, and settings forwarding" do
-    Funnel.Es.destroy("funnel")
     settings = '{"settings" : {"number_of_shards" : 1},"mappings" : {"type1" : {"_source" : { "enabled" : false },"properties" : {"field1" : { "type" : "string", "index" : "not_analyzed" }}}}}' |> IO.iodata_to_binary
     conn = conn(:post, "/index?token=index_creation", settings, headers: [{"content-type", "application/json"}])
     conn = FunnelHttp.Router.call(conn, @opts)
 
     {:ok, response} = JSEX.decode(conn.resp_body)
+    index_id = response["index_id"]
 
     assert conn.state == :sent
     assert conn.status == 200
-    assert response["index_id"] != nil
-    Funnel.Es.destroy("funnel")
+    assert index_id != nil
+    Funnel.Es.destroy(index_id)
+  end
+
+  test "allow to destroy an index with token" do
+    settings = '{"settings" : {"number_of_shards" : 1},"mappings" : {"type1" : {"_source" : { "enabled" : false },"properties" : {"field1" : { "type" : "string", "index" : "not_analyzed" }}}}}' |> IO.iodata_to_binary
+    conn = conn(:post, "/index?token=index_creation", settings, headers: [{"content-type", "application/json"}])
+    conn = FunnelHttp.Router.call(conn, @opts)
+
+    {:ok, response} = JSEX.decode(conn.resp_body)
+    index_id = response["index_id"]
+
+    conn = conn(:delete, "/index/#{index_id}?token=index_creation")
+    conn = FunnelHttp.Router.call(conn, @opts)
+
+    assert conn.state == :sent
+    assert conn.status == 200
+  end
+
+  test "does not allow to destroy an index without token" do
+    settings = '{"settings" : {"number_of_shards" : 1},"mappings" : {"type1" : {"_source" : { "enabled" : false },"properties" : {"field1" : { "type" : "string", "index" : "not_analyzed" }}}}}' |> IO.iodata_to_binary
+    conn = conn(:post, "/index?token=index_creation", settings, headers: [{"content-type", "application/json"}])
+    conn = FunnelHttp.Router.call(conn, @opts)
+
+    {:ok, response} = JSEX.decode(conn.resp_body)
+    index_id = response["index_id"]
+
+    conn = conn(:delete, "/index/#{index_id}")
+    conn = FunnelHttp.Router.call(conn, @opts)
+
+    {:ok, response} = JSEX.decode(conn.resp_body)
+
+    assert conn.state == :sent
+    assert conn.status == 400
+    assert response["error"] == "Unauthenticated"
   end
 end

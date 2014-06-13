@@ -24,6 +24,15 @@ defmodule FunnelHttp.Router do
       |> set_response(:index_creation)
   end
 
+  delete "/index/:index_id" do
+    [_, index_id] = conn.path_info
+    conn = %{conn | assigns: Map.put(conn.assigns, :index_id, index_id)}
+    {:ok, conn}
+      |> authenticate
+      |> set_content_type
+      |> set_response(:index_destroy)
+  end
+
   match _ do
     {:ok, conn}
       |> set_content_type
@@ -66,6 +75,11 @@ defmodule FunnelHttp.Router do
     end
 
     {status_code, body} = response
+    set_response({:ok, conn}, status_code, body)
+  end
+
+  defp set_response({:ok, conn}, :index_destroy) do
+    {status_code, body} = Funnel.Index.destroy(conn.assigns[:index_id])
     set_response({:ok, conn}, status_code, body)
   end
 
