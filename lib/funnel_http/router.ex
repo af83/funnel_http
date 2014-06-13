@@ -53,8 +53,7 @@ defmodule FunnelHttp.Router do
   end
 
   defp set_response({:ok, conn}, :status) do
-    response = Funnel.Es.get("/")
-    %{body: body, headers: _headers, status_code: status_code} = response
+    %{body: body, headers: _headers, status_code: status_code} = Funnel.Es.get("/")
     set_response({:ok, conn}, status_code, body)
   end
 
@@ -65,12 +64,7 @@ defmodule FunnelHttp.Router do
   end
 
   defp set_response({:ok, conn}, :index_creation) do
-    response = case req_body(conn) do
-      ""   -> Funnel.Index.create
-      body -> Funnel.Index.create(body)
-    end
-
-    {status_code, body} = response
+    {status_code, body} = req_body(conn) |> Funnel.Index.create
     set_response({:ok, conn}, status_code, body)
   end
 
