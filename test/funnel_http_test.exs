@@ -12,6 +12,7 @@ defmodule FunnelHttpTest do
 
     assert conn.state == :sent
     assert conn.status == 404
+    assert conn.assigns[:token] == nil
     assert response["error"] == "Not found"
   end
 
@@ -22,6 +23,7 @@ defmodule FunnelHttpTest do
 
     assert conn.state == :sent
     assert conn.status == 200
+    assert conn.assigns[:token] == nil
     assert response["status"] == 200
   end
 
@@ -44,6 +46,7 @@ defmodule FunnelHttpTest do
 
     assert conn.state == :sent
     assert conn.status == 400
+    assert response["token"] == nil
     assert response["error"] == "Unauthenticated"
   end
 
@@ -57,6 +60,7 @@ defmodule FunnelHttpTest do
 
     assert conn.state == :sent
     assert conn.status == 200
+    assert conn.assigns[:token] != nil
     assert index_id != nil
     Funnel.Es.destroy(index_id)
   end
@@ -72,6 +76,7 @@ defmodule FunnelHttpTest do
     assert conn.state == :sent
     assert conn.status == 200
     assert index_id != nil
+    assert conn.assigns[:token] != nil
     Funnel.Es.destroy(index_id)
   end
 
@@ -86,6 +91,7 @@ defmodule FunnelHttpTest do
     assert conn.state == :sent
     assert conn.status == 200
     assert index_id != nil
+    assert conn.assigns[:token] != nil
     Funnel.Es.destroy(index_id)
   end
 
@@ -100,6 +106,8 @@ defmodule FunnelHttpTest do
     conn = conn(:delete, "/index/#{index_id}?token=index_creation")
     conn = FunnelHttp.Router.call(conn, @opts)
 
+    assert conn.assigns[:index_id] == index_id
+    assert conn.assigns[:token] != nil
     assert conn.state == :sent
     assert conn.status == 200
   end
@@ -119,6 +127,7 @@ defmodule FunnelHttpTest do
 
     assert conn.state == :sent
     assert conn.status == 400
+    assert conn.assigns[:token] == nil
     assert response["error"] == "Unauthenticated"
   end
 end

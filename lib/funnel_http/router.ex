@@ -25,9 +25,7 @@ defmodule FunnelHttp.Router do
   end
 
   delete "/index/:index_id" do
-    [_, index_id] = conn.path_info
-    conn = %{conn | assigns: Map.put(conn.assigns, :index_id, index_id)}
-    {:ok, conn}
+    {:ok, assign(conn, :index_id, index_id)}
       |> authenticate
       |> set_content_type
       |> set_response(:index_destroy)
@@ -87,7 +85,7 @@ defmodule FunnelHttp.Router do
     conn = Plug.Conn.fetch_params(conn)
     case conn.params["token"] do
       nil   -> {:unauthenticated, conn}
-      token -> {:ok, %{conn | assigns: Map.put(conn.assigns, :token, token)}}
+      token -> {:ok, assign(conn, :token, token)}
     end
   end
 
