@@ -8,75 +8,75 @@ defmodule FunnelHttp.Router do
   get "/status" do
     {:ok, conn}
       |> set_content_type
-      |> set_response(:status)
+      |> respond_with(:status)
   end
 
   post "/register" do
     {:ok, conn}
       |> set_content_type
-      |> set_response(:register)
+      |> respond_with(:register)
   end
 
   post "/index" do
     {:ok, conn}
       |> authenticate
       |> set_content_type
-      |> set_response(:index_creation)
+      |> respond_with(:index_creation)
   end
 
   delete "/index/:index_id" do
     {:ok, assign(conn, :index_id, index_id)}
       |> authenticate
       |> set_content_type
-      |> set_response(:index_destroy)
+      |> respond_with(:index_destroy)
   end
 
   match _ do
     {:ok, conn}
       |> set_content_type
-      |> set_response(:not_found)
+      |> respond_with(:not_found)
   end
 
   defp set_content_type({result, conn}) do
     {result, put_resp_content_type(conn, "application/json")}
   end
 
-  defp set_response({:ok, conn}, status, response) do
+  defp respond_with({:ok, conn}, status, response) do
     send_resp(conn, status, response)
   end
 
-  defp set_response({:unauthenticated, conn}, _status, _response) do
+  defp respond_with({:unauthenticated, conn}, _status, _response) do
     {:ok, response} = JSEX.encode([error: "Unauthenticated"])
     send_resp(conn, 400, response)
   end
 
-  defp set_response({:ok, conn}, :status) do
+  defp respond_with({:ok, conn}, :status) do
     %{body: body, headers: _headers, status_code: status_code} = Funnel.Es.get("/")
-    set_response({:ok, conn}, status_code, body)
+    respond_with({:ok, conn}, status_code, body)
   end
 
-  defp set_response({:ok, conn}, :register) do
+  defp respond_with({:ok, conn}, :register) do
     token = Funnel.register conn
     {:ok, response} = JSEX.encode([token: token])
-    set_response({:ok, conn}, 201, response)
+    respond_with({:ok, conn}, 201, response)
   end
 
-  defp set_response({:ok, conn}, :index_creation) do
+  defp respond_with({:ok, conn}, :index_creation) do
     {status_code, body} = req_body(conn) |> Funnel.Index.create
-    set_response({:ok, conn}, status_code, body)
+    respond_with({:ok, conn}, status_code, body)
   end
 
-  defp set_response({:ok, conn}, :index_destroy) do
+  defp respond_with({:ok, conn}, :index_destroy) do
     {status_code, body} = Funnel.Index.destroy(conn.assigns[:index_id])
-    set_response({:ok, conn}, status_code, body)
+    respond_with({:ok, conn}, status_code, body)
   end
 
-  defp set_response({:ok, conn}, :not_found) do
+  defp respond_with({:ok, conn}, :not_found) do
     {:ok, response} = JSEX.encode([error: "Not found"])
     send_resp(conn, 404, response)
   end
 
-  defp set_response({:unauthenticated, conn}, _method) do
+  defp respond_with({:unauthenticated, conn}, _method) do
     {:ok, response} = JSEX.encode([error: "Unauthenticated"])
     send_resp(conn, 400, response)
   end
