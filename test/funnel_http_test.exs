@@ -180,7 +180,7 @@ defmodule FunnelHttpTest do
     assert response["error"] == "Unauthenticated"
   end
 
-  test "allow to update a query with token, and settings forwarding" do
+  test "allow to update a query with token" do
     settings = '{"settings" : {"number_of_shards" : 1},"mappings" : {"type1" : {"_source" : { "enabled" : false },"properties" : {"field1" : { "type" : "string", "index" : "not_analyzed" }}}}}' |> IO.iodata_to_binary
     conn = conn(:post, "/index?token=index_creation", settings, headers: [{"content-type", "application/json"}])
     conn = FunnelHttp.Router.call(conn, @opts)
@@ -203,6 +203,44 @@ defmodule FunnelHttpTest do
     assert conn.status == 200
     assert response["index_id"] == index_id
     assert response["query_id"] == query_id
+    assert response["token"] == nil
+
+    Funnel.Es.destroy(index_id)
+  end
+
+  test "does not allow to destroy a query without token" do
+    query = '{"query" : {"match" : {"message" : "elasticsearch"}}}' |> IO.iodata_to_binary
+    conn = conn(:delete, "/index/index_id/query/:query_id", query, headers: [{"content-type", "application/json"}])
+    conn = FunnelHttp.Router.call(conn, @opts)
+
+    {:ok, response} = JSEX.decode(conn.resp_body)
+
+    assert conn.state == :sent
+    assert conn.status == 400
+    assert response["token"] == nil
+    assert response["error"] == "Unauthenticated"
+  end
+
+  test "allow to destroy a query with token" do
+    settings = '{"settings" : {"number_of_shards" : 1},"mappings" : {"type1" : {"_source" : { "enabled" : false },"properties" : {"field1" : { "type" : "string", "index" : "not_analyzed" }}}}}' |> IO.iodata_to_binary
+    conn = conn(:post, "/index?token=index_creation", settings, headers: [{"content-type", "application/json"}])
+    conn = FunnelHttp.Router.call(conn, @opts)
+
+    {:ok, response} = JSEX.decode(conn.resp_body)
+    index_id = response["index_id"]
+
+    query = '{"query" : {"match" : {"message" : "elasticsearch"}}}' |> IO.iodata_to_binary
+    conn = conn(:post, "/index/#{index_id}/query?token=query_creation", query, headers: [{"content-type", "application/json"}])
+    conn = FunnelHttp.Router.call(conn, @opts)
+    {:ok, response} = JSEX.decode(conn.resp_body)
+    query_id = response["query_id"]
+
+    conn = conn(:delete, "/index/#{index_id}/query/#{query_id}?token=query_creation", headers: [{"content-type", "application/json"}])
+    conn = FunnelHttp.Router.call(conn, @opts)
+    {:ok, response} = JSEX.decode(conn.resp_body)
+
+    assert conn.state == :sent
+    assert conn.status == 200
     assert response["token"] == nil
 
     Funnel.Es.destroy(index_id)
