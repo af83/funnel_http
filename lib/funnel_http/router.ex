@@ -31,6 +31,13 @@ defmodule FunnelHttp.Router do
       |> respond_with(:index_destroy)
   end
 
+  post "/index/:index_id/query" do
+    {:ok, assign(conn, :index_id, index_id)}
+      |> authenticate
+      |> set_content_type
+      |> respond_with(:query_creation)
+  end
+
   match _ do
     {:ok, conn}
       |> set_content_type
@@ -68,6 +75,11 @@ defmodule FunnelHttp.Router do
 
   defp respond_with({:ok, conn}, :index_destroy) do
     {status_code, body} = Funnel.Index.destroy(conn.assigns[:index_id])
+    respond_with({:ok, conn}, status_code, body)
+  end
+
+  defp respond_with({:ok, conn}, :query_creation) do
+    {status_code, body} = Funnel.Query.create(conn.assigns[:index_id], conn.assigns[:token], req_body(conn))
     respond_with({:ok, conn}, status_code, body)
   end
 

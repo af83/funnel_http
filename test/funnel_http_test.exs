@@ -130,4 +130,40 @@ defmodule FunnelHttpTest do
     assert conn.assigns[:token] == nil
     assert response["error"] == "Unauthenticated"
   end
+
+  test "does not allow to create a query without token" do
+    query = '{"query" : {"match" : {"message" : "elasticsearch"}}}' |> IO.iodata_to_binary
+    conn = conn(:post, "/index/index_id/query", query, headers: [{"content-type", "application/json"}])
+    conn = FunnelHttp.Router.call(conn, @opts)
+
+    {:ok, response} = JSEX.decode(conn.resp_body)
+
+    assert conn.state == :sent
+    assert conn.status == 400
+    assert response["token"] == nil
+    assert response["error"] == "Unauthenticated"
+  end
+
+  test "allow to create a query with token, and settings forwarding" do
+    settings = '{"settings" : {"number_of_shards" : 1},"mappings" : {"type1" : {"_source" : { "enabled" : false },"properties" : {"field1" : { "type" : "string", "index" : "not_analyzed" }}}}}' |> IO.iodata_to_binary
+    conn = conn(:post, "/index?token=index_creation", settings, headers: [{"content-type", "application/json"}])
+    conn = FunnelHttp.Router.call(conn, @opts)
+
+    {:ok, response} = JSEX.decode(conn.resp_body)
+    index_id = response["index_id"]
+
+    query = '{"query" : {"match" : {"message" : "elasticsearch"}}}' |> IO.iodata_to_binary
+    conn = conn(:post, "/index/#{index_id}/query?token=query_creation", query, headers: [{"content-type", "application/json"}])
+    conn = FunnelHttp.Router.call(conn, @opts)
+
+    {:ok, response} = JSEX.decode(conn.resp_body)
+
+    assert conn.state == :sent
+    assert conn.status == 201
+    assert response["index_id"] == index_id
+    assert response["query_id"] != nil
+    assert response["token"] == nil
+
+    Funnel.Es.destroy(index_id)
+  end
 end
