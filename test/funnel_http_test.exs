@@ -4,6 +4,11 @@ defmodule FunnelHttpTest do
 
   @opts FunnelHttp.Router.init([])
 
+  teardown _context do
+    Funnel.Es.destroy("funnel")
+    :ok
+  end
+
   test "404" do
     conn = conn(:post, "/ohai")
     conn = FunnelHttp.Router.call(conn, @opts)
@@ -110,6 +115,7 @@ defmodule FunnelHttpTest do
     assert conn.assigns[:token] != nil
     assert conn.state == :sent
     assert conn.status == 200
+    Funnel.Es.destroy(index_id)
   end
 
   test "does not allow to destroy an index without token" do
@@ -129,6 +135,7 @@ defmodule FunnelHttpTest do
     assert conn.status == 400
     assert conn.assigns[:token] == nil
     assert response["error"] == "Unauthenticated"
+    Funnel.Es.destroy(index_id)
   end
 
   test "does not allow to create a query without token" do
