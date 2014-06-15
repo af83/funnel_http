@@ -38,6 +38,13 @@ defmodule FunnelHttp.Router do
       |> respond_with(:query_creation)
   end
 
+  put "/index/:index_id/query/:query_id" do
+    {:ok, assign(conn, :index_id, index_id) |> assign(:query_id, query_id)}
+      |> authenticate
+      |> set_content_type
+      |> respond_with(:query_update)
+  end
+
   match _ do
     {:ok, conn}
       |> set_content_type
@@ -80,6 +87,11 @@ defmodule FunnelHttp.Router do
 
   defp respond_with({:ok, conn}, :query_creation) do
     {status_code, body} = Funnel.Query.create(conn.assigns[:index_id], conn.assigns[:token], req_body(conn))
+    respond_with({:ok, conn}, status_code, body)
+  end
+
+  defp respond_with({:ok, conn}, :query_update) do
+    {status_code, body} = Funnel.Query.update(conn.assigns[:index_id], conn.assigns[:token], conn.assigns[:query_id], req_body(conn))
     respond_with({:ok, conn}, status_code, body)
   end
 
