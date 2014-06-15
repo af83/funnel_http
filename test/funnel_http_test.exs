@@ -140,7 +140,7 @@ defmodule FunnelHttpTest do
 
   test "does not allow to create a query without token" do
     query = '{"query" : {"match" : {"message" : "elasticsearch"}}}' |> IO.iodata_to_binary
-    conn = conn(:post, "/index/index_id/query", query, headers: [{"content-type", "application/json"}])
+    conn = conn(:post, "/index/index_id/queries", query, headers: [{"content-type", "application/json"}])
     conn = FunnelHttp.Router.call(conn, @opts)
 
     {:ok, response} = JSEX.decode(conn.resp_body)
@@ -160,7 +160,7 @@ defmodule FunnelHttpTest do
     index_id = response["index_id"]
 
     query = '{"query" : {"match" : {"message" : "elasticsearch"}}}' |> IO.iodata_to_binary
-    conn = conn(:post, "/index/#{index_id}/query?token=query_creation", query, headers: [{"content-type", "application/json"}])
+    conn = conn(:post, "/index/#{index_id}/queries?token=query_creation", query, headers: [{"content-type", "application/json"}])
     conn = FunnelHttp.Router.call(conn, @opts)
 
     {:ok, response} = JSEX.decode(conn.resp_body)
@@ -176,7 +176,7 @@ defmodule FunnelHttpTest do
 
   test "does not allow to update a query without token" do
     query = '{"query" : {"match" : {"message" : "elasticsearch"}}}' |> IO.iodata_to_binary
-    conn = conn(:put, "/index/index_id/query/:query_id", query, headers: [{"content-type", "application/json"}])
+    conn = conn(:put, "/index/index_id/queries/:query_id", query, headers: [{"content-type", "application/json"}])
     conn = FunnelHttp.Router.call(conn, @opts)
 
     {:ok, response} = JSEX.decode(conn.resp_body)
@@ -196,13 +196,13 @@ defmodule FunnelHttpTest do
     index_id = response["index_id"]
 
     query = '{"query" : {"match" : {"message" : "elasticsearch"}}}' |> IO.iodata_to_binary
-    conn = conn(:post, "/index/#{index_id}/query?token=query_creation", query, headers: [{"content-type", "application/json"}])
+    conn = conn(:post, "/index/#{index_id}/queries?token=query_creation", query, headers: [{"content-type", "application/json"}])
     conn = FunnelHttp.Router.call(conn, @opts)
     {:ok, response} = JSEX.decode(conn.resp_body)
     query_id = response["query_id"]
 
     query = '{"query" : {"match" : {"message" : "update"}}}' |> IO.iodata_to_binary
-    conn = conn(:put, "/index/#{index_id}/query/#{query_id}?token=query_creation", query, headers: [{"content-type", "application/json"}])
+    conn = conn(:put, "/index/#{index_id}/queries/#{query_id}?token=query_creation", query, headers: [{"content-type", "application/json"}])
     conn = FunnelHttp.Router.call(conn, @opts)
     {:ok, response} = JSEX.decode(conn.resp_body)
 
@@ -217,7 +217,7 @@ defmodule FunnelHttpTest do
 
   test "does not allow to destroy a query without token" do
     query = '{"query" : {"match" : {"message" : "elasticsearch"}}}' |> IO.iodata_to_binary
-    conn = conn(:delete, "/index/index_id/query/:query_id", query, headers: [{"content-type", "application/json"}])
+    conn = conn(:delete, "/index/index_id/queries/:query_id", query, headers: [{"content-type", "application/json"}])
     conn = FunnelHttp.Router.call(conn, @opts)
 
     {:ok, response} = JSEX.decode(conn.resp_body)
@@ -237,12 +237,12 @@ defmodule FunnelHttpTest do
     index_id = response["index_id"]
 
     query = '{"query" : {"match" : {"message" : "elasticsearch"}}}' |> IO.iodata_to_binary
-    conn = conn(:post, "/index/#{index_id}/query?token=query_creation", query, headers: [{"content-type", "application/json"}])
+    conn = conn(:post, "/index/#{index_id}/queries?token=query_creation", query, headers: [{"content-type", "application/json"}])
     conn = FunnelHttp.Router.call(conn, @opts)
     {:ok, response} = JSEX.decode(conn.resp_body)
     query_id = response["query_id"]
 
-    conn = conn(:delete, "/index/#{index_id}/query/#{query_id}?token=query_creation", headers: [{"content-type", "application/json"}])
+    conn = conn(:delete, "/index/#{index_id}/queries/#{query_id}?token=query_creation", headers: [{"content-type", "application/json"}])
     conn = FunnelHttp.Router.call(conn, @opts)
     {:ok, response} = JSEX.decode(conn.resp_body)
 

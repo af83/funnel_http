@@ -31,21 +31,21 @@ defmodule FunnelHttp.Router do
       |> respond_with(:index_destroy)
   end
 
-  post "/index/:index_id/query" do
+  post "/index/:index_id/queries" do
     {:ok, assign(conn, :index_id, index_id)}
       |> authenticate
       |> set_content_type
       |> respond_with(:query_creation)
   end
 
-  put "/index/:index_id/query/:query_id" do
+  put "/index/:index_id/queries/:query_id" do
     {:ok, assign(conn, :index_id, index_id) |> assign(:query_id, query_id)}
       |> authenticate
       |> set_content_type
       |> respond_with(:query_update)
   end
 
-  delete "/index/:index_id/query/:query_id" do
+  delete "/index/:index_id/queries/:query_id" do
     {:ok, assign(conn, :index_id, index_id) |> assign(:query_id, query_id)}
       |> authenticate
       |> set_content_type
