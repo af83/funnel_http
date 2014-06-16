@@ -310,4 +310,15 @@ defmodule FunnelHttpTest do
     assert conn.state == :chunked
     assert conn.status == 200
   end
+
+  test "river with a token and send a message" do
+    conn = conn(:get, "/river?token=river", headers: [{"content-type", "application/json"}])
+    conn = FunnelHttp.Router.call(conn, @opts)
+
+    assert conn.state == :chunked
+    assert conn.status == 200
+
+    message = "{\"doc\":{\"message\":\"this new elasticsearch percolator feature is nice, borat style\"}}"
+    Funnel.Transistor.notify("river", Funnel.Uuid.generate, message)
+  end
 end
