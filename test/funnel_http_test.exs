@@ -252,4 +252,42 @@ defmodule FunnelHttpTest do
 
     Funnel.Es.destroy(index_id)
   end
+
+  test "submit a document to the percolator" do
+    settings = '{"settings" : {"number_of_shards" : 1},"mappings" : {"type1" : {"_source" : { "enabled" : false },"properties" : {"field1" : { "type" : "string", "index" : "not_analyzed" }}}}}' |> IO.iodata_to_binary
+    message = "{\"doc\":{\"message\":\"this new elasticsearch percolator feature is nice, borat style\"}}"
+
+    conn = conn(:post, "/index?token=index_creation", settings, headers: [{"content-type", "application/json"}])
+    conn = FunnelHttp.Router.call(conn, @opts)
+
+    {:ok, response} = JSEX.decode(conn.resp_body)
+    index_id = response["index_id"]
+
+    conn = conn(:post, "/index/#{index_id}/feeding", message, headers: [{"content-type", "application/json"}])
+    conn = FunnelHttp.Router.call(conn, @opts)
+
+    assert conn.state == :sent
+    assert conn.status == 204
+
+    Funnel.Es.destroy(index_id)
+  end
+
+  test "submit a list of documents to the percolator" do
+    settings = '{"settings" : {"number_of_shards" : 1},"mappings" : {"type1" : {"_source" : { "enabled" : false },"properties" : {"field1" : { "type" : "string", "index" : "not_analyzed" }}}}}' |> IO.iodata_to_binary
+    messages = "[{\"doc\" : {\"message\":\"So long, and thanks for all the fish\"}},{\"doc\":{\"message\":\"Say thanks to the fish\"}}]"
+
+    conn = conn(:post, "/index?token=index_creation", settings, headers: [{"content-type", "application/json"}])
+    conn = FunnelHttp.Router.call(conn, @opts)
+
+    {:ok, response} = JSEX.decode(conn.resp_body)
+    index_id = response["index_id"]
+
+    conn = conn(:post, "/index/#{index_id}/feeding", messages, headers: [{"content-type", "application/json"}])
+    conn = FunnelHttp.Router.call(conn, @opts)
+
+    assert conn.state == :sent
+    assert conn.status == 204
+
+    Funnel.Es.destroy(index_id)
+  end
 end

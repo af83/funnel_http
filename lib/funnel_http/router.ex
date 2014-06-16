@@ -52,6 +52,12 @@ defmodule FunnelHttp.Router do
       |> respond_with(:query_destroy)
   end
 
+  post "/index/:index_id/feeding" do
+    {:ok, assign(conn, :index_id, index_id)}
+      |> set_content_type
+      |> respond_with(:feeding)
+  end
+
   match _ do
     {:ok, conn}
       |> set_content_type
@@ -105,6 +111,11 @@ defmodule FunnelHttp.Router do
   defp respond_with({:ok, conn}, :query_destroy) do
     {status_code, body} = Funnel.Query.destroy(conn.assigns[:index_id], conn.assigns[:token], conn.assigns[:query_id])
     respond_with({:ok, conn}, status_code, body)
+  end
+
+  defp respond_with({:ok, conn}, :feeding) do
+    Funnel.percolate(conn.assigns[:index_id], req_body(conn))
+    respond_with({:ok, conn}, 204, "")
   end
 
   defp respond_with({:ok, conn}, :not_found) do
