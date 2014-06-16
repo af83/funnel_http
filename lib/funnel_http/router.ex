@@ -58,6 +58,13 @@ defmodule FunnelHttp.Router do
       |> respond_with(:feeding)
   end
 
+  get "/river" do
+    {:ok, conn}
+      |> authenticate
+      |> set_content_type
+      |> respond_with(:river)
+  end
+
   match _ do
     {:ok, conn}
       |> set_content_type
@@ -116,6 +123,12 @@ defmodule FunnelHttp.Router do
   defp respond_with({:ok, conn}, :feeding) do
     Funnel.percolate(conn.assigns[:index_id], req_body(conn))
     respond_with({:ok, conn}, 204, "")
+  end
+
+  defp respond_with({:ok, conn}, :river) do
+    conn = send_chunked(conn, 200)
+    Funnel.register(conn, conn.assigns[:token], conn.params[:last_id])
+    conn
   end
 
   defp respond_with({:ok, conn}, :not_found) do

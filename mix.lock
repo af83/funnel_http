@@ -1,7 +1,7 @@
 %{"cowboy": {:git, "git://github.com/extend/cowboy.git", "7a808e0aa3e764d923da74e18f76790936d19a35", []},
   "cowlib": {:git, "git://github.com/extend/cowlib.git", "f58340a0044856bb508df03cfe94cf79308380a2", [ref: "0.6.1"]},
   "dynamo": {:git, "git://github.com/dynamo/dynamo.git", "3c28f27603a480d2755a89aba3a91e88df3469ce", []},
-  "funnel": {:git, "git://github.com/AF83/funnel.git", "68e2e4a3945470980e7ce6662f98fdac63318c72", [branch: "undynamo"]},
+  "funnel": {:git, "git://github.com/AF83/funnel.git", "d6f7e7571715938ba5c6d8546812bba70d15617b", [branch: "undynamo"]},
   "httpotion": {:git, "git://github.com/myfreeweb/httpotion.git", "e482c4fa0016049c7738dec7261b7b3b6659b3cc", []},
   "ibrowse": {:git, "git://github.com/cmullaparthi/ibrowse.git", "7871e2ebe8811efb64e1917e2de455fa87e8dfe3", [tag: "v4.1.0"]},
   "jsex": {:package, "2.0.0"},

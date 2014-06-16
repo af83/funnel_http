@@ -290,4 +290,24 @@ defmodule FunnelHttpTest do
 
     Funnel.Es.destroy(index_id)
   end
+
+  test "river without a token" do
+    conn = conn(:get, "/river", headers: [{"content-type", "application/json"}])
+    conn = FunnelHttp.Router.call(conn, @opts)
+
+    {:ok, response} = JSEX.decode(conn.resp_body)
+
+    assert conn.state == :sent
+    assert conn.status == 400
+    assert response["token"] == nil
+    assert response["error"] == "Unauthenticated"
+  end
+
+  test "river with a token" do
+    conn = conn(:get, "/river?token=river", headers: [{"content-type", "application/json"}])
+    conn = FunnelHttp.Router.call(conn, @opts)
+
+    assert conn.state == :chunked
+    assert conn.status == 200
+  end
 end
