@@ -371,4 +371,35 @@ defmodule FunnelHttpTest do
     assert conn.status == 200
     Funnel.Es.destroy("several_indexes")
   end
+
+  test "find queries for a given index without a token" do
+    conn = conn(:get, "/index/index_id/queries", headers: [{"content-type", "application/json"}])
+    conn = FunnelHttp.Router.call(conn, @opts)
+
+    {:ok, response} = JSEX.decode(conn.resp_body)
+
+    assert conn.state == :sent
+    assert conn.status == 400
+    assert response["token"] == nil
+    assert response["error"] == "Unauthenticated"
+  end
+
+  test "find queries based on token for a given index" do
+    query = '{"query" : {"term" : {"field1" : "value1"}}}' |> IO.iodata_to_binary
+    token = "query_find_mono_index"
+    Funnel.Es.register("mono_index", token, query)
+    Funnel.Es.register("funneler", token, query)
+    Funnel.Es.refresh
+
+    conn = conn(:get, "/index/funneler/queries?token=#{token}", headers: [{"content-type", "application/json"}])
+    conn = FunnelHttp.Router.call(conn, @opts)
+
+    {:ok, response} = JSEX.decode(conn.resp_body)
+
+    assert Enum.count(response) == 1
+    assert conn.state == :sent
+    assert conn.status == 200
+    Funnel.Es.destroy("mono_index")
+    Funnel.Es.destroy("funneler")
+  end
 end

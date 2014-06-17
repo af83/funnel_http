@@ -38,6 +38,13 @@ defmodule FunnelHttp.Router do
       |> respond_with(:query_creation)
   end
 
+  get "/index/:index_id/queries" do
+    {:ok, assign(conn, :index_id, index_id)}
+      |> authenticate
+      |> set_content_type
+      |> respond_with(:query_find_for_index)
+  end
+
   put "/index/:index_id/queries/:query_id" do
     {:ok, assign(conn, :index_id, index_id) |> assign(:query_id, query_id)}
       |> authenticate
@@ -140,6 +147,11 @@ defmodule FunnelHttp.Router do
 
   defp respond_with({:ok, conn}, :query_find) do
     {status_code, body} = Funnel.Query.find(conn.assigns[:token])
+    respond_with({:ok, conn}, status_code, body)
+  end
+
+  defp respond_with({:ok, conn}, :query_find_for_index) do
+    {status_code, body} = Funnel.Query.find(conn.assigns[:token], %{index_id: conn.assigns[:index_id]})
     respond_with({:ok, conn}, status_code, body)
   end
 
