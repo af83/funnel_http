@@ -4,7 +4,7 @@ defmodule FunnelHttp.Mixfile do
   def project do
     [app: :funnel_http,
      version: "0.0.1",
-     elixir: "~> 0.13.3",
+     elixir: "~> 0.14",
      deps: deps]
   end
 
@@ -19,7 +19,7 @@ defmodule FunnelHttp.Mixfile do
   defp deps do
     [
       {:cowboy, github: "extend/cowboy"},
-      {:plug, "~> 0.4.2"},
+      {:plug, "~> 0.5"},
       {:funnel, github: "AF83/funnel", branch: "undynamo"}
     ]
   end
