@@ -337,7 +337,7 @@ defmodule FunnelHttpTest do
   test "find queries based on token" do
     query = '{"query" : {"term" : {"field1" : "value1"}}}' |> IO.iodata_to_binary
     token = "query_find"
-    {status, response} = Funnel.Es.register("funnel", token, query)
+    {_status, response} = Funnel.Es.register("funnel", token, query)
     {:ok, body} = JSEX.decode response
     query_id =  body["query_id"]
     Funnel.Es.refresh
@@ -348,8 +348,27 @@ defmodule FunnelHttpTest do
     {:ok, response} = JSEX.decode(conn.resp_body)
     query = List.first(response)
 
+    assert Enum.count(response) == 1
     assert query["query_id"] == query_id
     assert conn.state == :sent
     assert conn.status == 200
+  end
+
+  test "find queries based on token on several indexes" do
+    query = '{"query" : {"term" : {"field1" : "value1"}}}' |> IO.iodata_to_binary
+    token = "query_find"
+    Funnel.Es.register("several_indexes", token, query)
+    Funnel.Es.register("funnel", token, query)
+    Funnel.Es.refresh
+
+    conn = conn(:get, "/queries?token=#{token}", headers: [{"content-type", "application/json"}])
+    conn = FunnelHttp.Router.call(conn, @opts)
+
+    {:ok, response} = JSEX.decode(conn.resp_body)
+
+    assert Enum.count(response) == 2
+    assert conn.state == :sent
+    assert conn.status == 200
+    Funnel.Es.destroy("several_indexes")
   end
 end
