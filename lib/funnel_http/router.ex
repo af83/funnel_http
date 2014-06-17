@@ -65,6 +65,13 @@ defmodule FunnelHttp.Router do
       |> respond_with(:river)
   end
 
+  get "/queries" do
+    {:ok, conn}
+      |> authenticate
+      |> set_content_type
+      |> respond_with(:query_find)
+  end
+
   match _ do
     {:ok, conn}
       |> set_content_type
@@ -129,6 +136,11 @@ defmodule FunnelHttp.Router do
     conn = send_chunked(conn, 200)
     Funnel.register(conn, conn.assigns[:token], conn.params[:last_id])
     conn
+  end
+
+  defp respond_with({:ok, conn}, :query_find) do
+    {status_code, body} = Funnel.Query.find(conn.assigns[:token])
+    respond_with({:ok, conn}, status_code, body)
   end
 
   defp respond_with({:ok, conn}, :not_found) do

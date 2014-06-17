@@ -321,4 +321,35 @@ defmodule FunnelHttpTest do
     message = "{\"doc\":{\"message\":\"this new elasticsearch percolator feature is nice, borat style\"}}"
     Funnel.Transistor.notify("river", Funnel.Uuid.generate, message)
   end
+
+  test "find queries without a token" do
+    conn = conn(:get, "/queries", headers: [{"content-type", "application/json"}])
+    conn = FunnelHttp.Router.call(conn, @opts)
+
+    {:ok, response} = JSEX.decode(conn.resp_body)
+
+    assert conn.state == :sent
+    assert conn.status == 400
+    assert response["token"] == nil
+    assert response["error"] == "Unauthenticated"
+  end
+
+  test "find queries based on token" do
+    query = '{"query" : {"term" : {"field1" : "value1"}}}' |> IO.iodata_to_binary
+    token = "query_find"
+    {status, response} = Funnel.Es.register("funnel", token, query)
+    {:ok, body} = JSEX.decode response
+    query_id =  body["query_id"]
+    Funnel.Es.refresh
+
+    conn = conn(:get, "/queries?token=#{token}", headers: [{"content-type", "application/json"}])
+    conn = FunnelHttp.Router.call(conn, @opts)
+
+    {:ok, response} = JSEX.decode(conn.resp_body)
+    query = List.first(response)
+
+    assert query["query_id"] == query_id
+    assert conn.state == :sent
+    assert conn.status == 200
+  end
 end
