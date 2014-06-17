@@ -57,7 +57,7 @@ defmodule FunnelHttpTest do
 
   test "allow to create an index with token" do
     Funnel.Es.destroy("funnel")
-    conn = conn(:post, "/index?token=index_creation", [], headers: [{"content-type", "application/json"}])
+    conn = conn(:post, "/index", "", headers: [{"content-type", "application/json"}, {"authorization", "index_creation"}])
     conn = FunnelHttp.Router.call(conn, @opts)
 
     {:ok, response} = JSEX.decode(conn.resp_body)

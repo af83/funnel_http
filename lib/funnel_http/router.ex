@@ -167,7 +167,7 @@ defmodule FunnelHttp.Router do
 
   defp authenticate({:ok, conn}) do
     conn = Plug.Conn.fetch_params(conn)
-    case conn.params["token"] do
+    case conn.params["token"] || get_header(conn.req_headers, "authorization") do
       nil   -> {:unauthenticated, conn}
       token -> {:ok, assign(conn, :token, token)}
     end
@@ -176,5 +176,12 @@ defmodule FunnelHttp.Router do
   defp req_body(conn) do
     {_, %{req_body: req_body}} = conn.adapter
     req_body
+  end
+
+  defp get_header(headers, key) do
+    case List.keyfind(headers, key, 0) do
+      {^key, value} -> value
+      nil -> nil
+    end
   end
 end
