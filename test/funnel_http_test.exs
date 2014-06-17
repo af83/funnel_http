@@ -9,6 +9,19 @@ defmodule FunnelHttpTest do
     :ok
   end
 
+  def headers do
+    [
+      {"content-type", "application/json"}
+    ]
+  end
+
+  def authenticate_headers do
+    [
+      {"content-type", "application/json"},
+      {"authorization", "index_creation"}
+    ]
+  end
+
   test "404" do
     conn = conn(:post, "/ohai")
     conn = FunnelHttp.Router.call(conn, @opts)
@@ -44,7 +57,7 @@ defmodule FunnelHttpTest do
   end
 
   test "does not allow to create an index without token" do
-    conn = conn(:post, "/index", "{\"settings\":\"stuff\"}", headers: [{"content-type", "application/json"}])
+    conn = conn(:post, "/index", "{\"settings\":\"stuff\"}", headers: headers)
     conn = FunnelHttp.Router.call(conn, @opts)
 
     {:ok, response} = JSEX.decode(conn.resp_body)
@@ -57,7 +70,7 @@ defmodule FunnelHttpTest do
 
   test "allow to create an index with token" do
     Funnel.Es.destroy("funnel")
-    conn = conn(:post, "/index", "", headers: [{"content-type", "application/json"}, {"authorization", "index_creation"}])
+    conn = conn(:post, "/index", "", headers: authenticate_headers)
     conn = FunnelHttp.Router.call(conn, @opts)
 
     {:ok, response} = JSEX.decode(conn.resp_body)
@@ -72,7 +85,7 @@ defmodule FunnelHttpTest do
 
   test "allow to create an index with token and empty body" do
     Funnel.Es.destroy("funnel")
-    conn = conn(:post, "/index?token=index_creation", "", headers: [{"content-type", "application/json"}])
+    conn = conn(:post, "/index?token=index_creation", "", headers: headers)
     conn = FunnelHttp.Router.call(conn, @opts)
 
     {:ok, response} = JSEX.decode(conn.resp_body)
@@ -87,7 +100,7 @@ defmodule FunnelHttpTest do
 
   test "allow to create an index with token, and settings forwarding" do
     settings = '{"settings" : {"number_of_shards" : 1},"mappings" : {"type1" : {"_source" : { "enabled" : false },"properties" : {"field1" : { "type" : "string", "index" : "not_analyzed" }}}}}' |> IO.iodata_to_binary
-    conn = conn(:post, "/index?token=index_creation", settings, headers: [{"content-type", "application/json"}])
+    conn = conn(:post, "/index?token=index_creation", settings, headers: headers)
     conn = FunnelHttp.Router.call(conn, @opts)
 
     {:ok, response} = JSEX.decode(conn.resp_body)
@@ -102,7 +115,7 @@ defmodule FunnelHttpTest do
 
   test "allow to destroy an index with token" do
     settings = '{"settings" : {"number_of_shards" : 1},"mappings" : {"type1" : {"_source" : { "enabled" : false },"properties" : {"field1" : { "type" : "string", "index" : "not_analyzed" }}}}}' |> IO.iodata_to_binary
-    conn = conn(:post, "/index?token=index_creation", settings, headers: [{"content-type", "application/json"}])
+    conn = conn(:post, "/index?token=index_creation", settings, headers: headers)
     conn = FunnelHttp.Router.call(conn, @opts)
 
     {:ok, response} = JSEX.decode(conn.resp_body)
@@ -120,7 +133,7 @@ defmodule FunnelHttpTest do
 
   test "does not allow to destroy an index without token" do
     settings = '{"settings" : {"number_of_shards" : 1},"mappings" : {"type1" : {"_source" : { "enabled" : false },"properties" : {"field1" : { "type" : "string", "index" : "not_analyzed" }}}}}' |> IO.iodata_to_binary
-    conn = conn(:post, "/index?token=index_creation", settings, headers: [{"content-type", "application/json"}])
+    conn = conn(:post, "/index?token=index_creation", settings, headers: headers)
     conn = FunnelHttp.Router.call(conn, @opts)
 
     {:ok, response} = JSEX.decode(conn.resp_body)
@@ -140,7 +153,7 @@ defmodule FunnelHttpTest do
 
   test "does not allow to create a query without token" do
     query = '{"query" : {"match" : {"message" : "elasticsearch"}}}' |> IO.iodata_to_binary
-    conn = conn(:post, "/index/index_id/queries", query, headers: [{"content-type", "application/json"}])
+    conn = conn(:post, "/index/index_id/queries", query, headers: headers)
     conn = FunnelHttp.Router.call(conn, @opts)
 
     {:ok, response} = JSEX.decode(conn.resp_body)
@@ -153,14 +166,14 @@ defmodule FunnelHttpTest do
 
   test "allow to create a query with token, and settings forwarding" do
     settings = '{"settings" : {"number_of_shards" : 1},"mappings" : {"type1" : {"_source" : { "enabled" : false },"properties" : {"field1" : { "type" : "string", "index" : "not_analyzed" }}}}}' |> IO.iodata_to_binary
-    conn = conn(:post, "/index?token=index_creation", settings, headers: [{"content-type", "application/json"}])
+    conn = conn(:post, "/index?token=index_creation", settings, headers: headers)
     conn = FunnelHttp.Router.call(conn, @opts)
 
     {:ok, response} = JSEX.decode(conn.resp_body)
     index_id = response["index_id"]
 
     query = '{"query" : {"match" : {"message" : "elasticsearch"}}}' |> IO.iodata_to_binary
-    conn = conn(:post, "/index/#{index_id}/queries?token=query_creation", query, headers: [{"content-type", "application/json"}])
+    conn = conn(:post, "/index/#{index_id}/queries?token=query_creation", query, headers: headers)
     conn = FunnelHttp.Router.call(conn, @opts)
 
     {:ok, response} = JSEX.decode(conn.resp_body)
@@ -176,7 +189,7 @@ defmodule FunnelHttpTest do
 
   test "does not allow to update a query without token" do
     query = '{"query" : {"match" : {"message" : "elasticsearch"}}}' |> IO.iodata_to_binary
-    conn = conn(:put, "/index/index_id/queries/:query_id", query, headers: [{"content-type", "application/json"}])
+    conn = conn(:put, "/index/index_id/queries/:query_id", query, headers: headers)
     conn = FunnelHttp.Router.call(conn, @opts)
 
     {:ok, response} = JSEX.decode(conn.resp_body)
@@ -189,20 +202,20 @@ defmodule FunnelHttpTest do
 
   test "allow to update a query with token" do
     settings = '{"settings" : {"number_of_shards" : 1},"mappings" : {"type1" : {"_source" : { "enabled" : false },"properties" : {"field1" : { "type" : "string", "index" : "not_analyzed" }}}}}' |> IO.iodata_to_binary
-    conn = conn(:post, "/index?token=index_creation", settings, headers: [{"content-type", "application/json"}])
+    conn = conn(:post, "/index?token=index_creation", settings, headers: headers)
     conn = FunnelHttp.Router.call(conn, @opts)
 
     {:ok, response} = JSEX.decode(conn.resp_body)
     index_id = response["index_id"]
 
     query = '{"query" : {"match" : {"message" : "elasticsearch"}}}' |> IO.iodata_to_binary
-    conn = conn(:post, "/index/#{index_id}/queries?token=query_creation", query, headers: [{"content-type", "application/json"}])
+    conn = conn(:post, "/index/#{index_id}/queries?token=query_creation", query, headers: headers)
     conn = FunnelHttp.Router.call(conn, @opts)
     {:ok, response} = JSEX.decode(conn.resp_body)
     query_id = response["query_id"]
 
     query = '{"query" : {"match" : {"message" : "update"}}}' |> IO.iodata_to_binary
-    conn = conn(:put, "/index/#{index_id}/queries/#{query_id}?token=query_creation", query, headers: [{"content-type", "application/json"}])
+    conn = conn(:put, "/index/#{index_id}/queries/#{query_id}?token=query_creation", query, headers: headers)
     conn = FunnelHttp.Router.call(conn, @opts)
     {:ok, response} = JSEX.decode(conn.resp_body)
 
@@ -217,7 +230,7 @@ defmodule FunnelHttpTest do
 
   test "does not allow to destroy a query without token" do
     query = '{"query" : {"match" : {"message" : "elasticsearch"}}}' |> IO.iodata_to_binary
-    conn = conn(:delete, "/index/index_id/queries/:query_id", query, headers: [{"content-type", "application/json"}])
+    conn = conn(:delete, "/index/index_id/queries/:query_id", query, headers: headers)
     conn = FunnelHttp.Router.call(conn, @opts)
 
     {:ok, response} = JSEX.decode(conn.resp_body)
@@ -230,19 +243,19 @@ defmodule FunnelHttpTest do
 
   test "allow to destroy a query with token" do
     settings = '{"settings" : {"number_of_shards" : 1},"mappings" : {"type1" : {"_source" : { "enabled" : false },"properties" : {"field1" : { "type" : "string", "index" : "not_analyzed" }}}}}' |> IO.iodata_to_binary
-    conn = conn(:post, "/index?token=index_creation", settings, headers: [{"content-type", "application/json"}])
+    conn = conn(:post, "/index?token=index_creation", settings, headers: headers)
     conn = FunnelHttp.Router.call(conn, @opts)
 
     {:ok, response} = JSEX.decode(conn.resp_body)
     index_id = response["index_id"]
 
     query = '{"query" : {"match" : {"message" : "elasticsearch"}}}' |> IO.iodata_to_binary
-    conn = conn(:post, "/index/#{index_id}/queries?token=query_creation", query, headers: [{"content-type", "application/json"}])
+    conn = conn(:post, "/index/#{index_id}/queries?token=query_creation", query, headers: headers)
     conn = FunnelHttp.Router.call(conn, @opts)
     {:ok, response} = JSEX.decode(conn.resp_body)
     query_id = response["query_id"]
 
-    conn = conn(:delete, "/index/#{index_id}/queries/#{query_id}?token=query_creation", headers: [{"content-type", "application/json"}])
+    conn = conn(:delete, "/index/#{index_id}/queries/#{query_id}?token=query_creation", headers: headers)
     conn = FunnelHttp.Router.call(conn, @opts)
     {:ok, response} = JSEX.decode(conn.resp_body)
 
@@ -257,13 +270,13 @@ defmodule FunnelHttpTest do
     settings = '{"settings" : {"number_of_shards" : 1},"mappings" : {"type1" : {"_source" : { "enabled" : false },"properties" : {"field1" : { "type" : "string", "index" : "not_analyzed" }}}}}' |> IO.iodata_to_binary
     message = "{\"doc\":{\"message\":\"this new elasticsearch percolator feature is nice, borat style\"}}"
 
-    conn = conn(:post, "/index?token=index_creation", settings, headers: [{"content-type", "application/json"}])
+    conn = conn(:post, "/index?token=index_creation", settings, headers: headers)
     conn = FunnelHttp.Router.call(conn, @opts)
 
     {:ok, response} = JSEX.decode(conn.resp_body)
     index_id = response["index_id"]
 
-    conn = conn(:post, "/index/#{index_id}/feeding", message, headers: [{"content-type", "application/json"}])
+    conn = conn(:post, "/index/#{index_id}/feeding", message, headers: headers)
     conn = FunnelHttp.Router.call(conn, @opts)
 
     assert conn.state == :sent
@@ -276,13 +289,13 @@ defmodule FunnelHttpTest do
     settings = '{"settings" : {"number_of_shards" : 1},"mappings" : {"type1" : {"_source" : { "enabled" : false },"properties" : {"field1" : { "type" : "string", "index" : "not_analyzed" }}}}}' |> IO.iodata_to_binary
     messages = "[{\"doc\" : {\"message\":\"So long, and thanks for all the fish\"}},{\"doc\":{\"message\":\"Say thanks to the fish\"}}]"
 
-    conn = conn(:post, "/index?token=index_creation", settings, headers: [{"content-type", "application/json"}])
+    conn = conn(:post, "/index?token=index_creation", settings, headers: headers)
     conn = FunnelHttp.Router.call(conn, @opts)
 
     {:ok, response} = JSEX.decode(conn.resp_body)
     index_id = response["index_id"]
 
-    conn = conn(:post, "/index/#{index_id}/feeding", messages, headers: [{"content-type", "application/json"}])
+    conn = conn(:post, "/index/#{index_id}/feeding", messages, headers: headers)
     conn = FunnelHttp.Router.call(conn, @opts)
 
     assert conn.state == :sent
@@ -292,7 +305,7 @@ defmodule FunnelHttpTest do
   end
 
   test "river without a token" do
-    conn = conn(:get, "/river", headers: [{"content-type", "application/json"}])
+    conn = conn(:get, "/river", headers: headers)
     conn = FunnelHttp.Router.call(conn, @opts)
 
     {:ok, response} = JSEX.decode(conn.resp_body)
@@ -304,7 +317,7 @@ defmodule FunnelHttpTest do
   end
 
   test "river with a token" do
-    conn = conn(:get, "/river?token=river", headers: [{"content-type", "application/json"}])
+    conn = conn(:get, "/river?token=river", headers: headers)
     conn = FunnelHttp.Router.call(conn, @opts)
 
     assert conn.state == :chunked
@@ -312,7 +325,7 @@ defmodule FunnelHttpTest do
   end
 
   test "river with a token and send a message" do
-    conn = conn(:get, "/river?token=river", headers: [{"content-type", "application/json"}])
+    conn = conn(:get, "/river?token=river", headers: headers)
     conn = FunnelHttp.Router.call(conn, @opts)
 
     assert conn.state == :chunked
@@ -323,7 +336,7 @@ defmodule FunnelHttpTest do
   end
 
   test "find queries without a token" do
-    conn = conn(:get, "/queries", headers: [{"content-type", "application/json"}])
+    conn = conn(:get, "/queries", headers: headers)
     conn = FunnelHttp.Router.call(conn, @opts)
 
     {:ok, response} = JSEX.decode(conn.resp_body)
@@ -342,7 +355,7 @@ defmodule FunnelHttpTest do
     query_id =  body["query_id"]
     Funnel.Es.refresh
 
-    conn = conn(:get, "/queries?token=#{token}", headers: [{"content-type", "application/json"}])
+    conn = conn(:get, "/queries?token=#{token}", headers: headers)
     conn = FunnelHttp.Router.call(conn, @opts)
 
     {:ok, response} = JSEX.decode(conn.resp_body)
@@ -361,7 +374,7 @@ defmodule FunnelHttpTest do
     Funnel.Es.register("funnel", token, query)
     Funnel.Es.refresh
 
-    conn = conn(:get, "/queries?token=#{token}", headers: [{"content-type", "application/json"}])
+    conn = conn(:get, "/queries?token=#{token}", headers: headers)
     conn = FunnelHttp.Router.call(conn, @opts)
 
     {:ok, response} = JSEX.decode(conn.resp_body)
@@ -373,7 +386,7 @@ defmodule FunnelHttpTest do
   end
 
   test "find queries for a given index without a token" do
-    conn = conn(:get, "/index/index_id/queries", headers: [{"content-type", "application/json"}])
+    conn = conn(:get, "/index/index_id/queries", headers: headers)
     conn = FunnelHttp.Router.call(conn, @opts)
 
     {:ok, response} = JSEX.decode(conn.resp_body)
@@ -391,7 +404,7 @@ defmodule FunnelHttpTest do
     Funnel.Es.register("funneler", token, query)
     Funnel.Es.refresh
 
-    conn = conn(:get, "/index/funneler/queries?token=#{token}", headers: [{"content-type", "application/json"}])
+    conn = conn(:get, "/index/funneler/queries?token=#{token}", headers: headers)
     conn = FunnelHttp.Router.call(conn, @opts)
 
     {:ok, response} = JSEX.decode(conn.resp_body)
