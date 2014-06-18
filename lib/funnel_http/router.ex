@@ -146,7 +146,10 @@ defmodule FunnelHttp.Router do
   defp respond_with({:ok, conn}, :river) do
     conn = send_chunked(conn, 200)
     Funnel.register(conn, conn.assigns[:token], conn.params[:last_id])
-    :timer.sleep(:infinity)
+    case Mix.env do
+      :test -> conn
+      _     -> :timer.sleep(:infinity)
+    end
   end
 
   defp respond_with({:ok, conn}, :query_find) do
