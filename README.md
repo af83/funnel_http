@@ -23,7 +23,7 @@ mix server
 
 ### Testing things
 
-`` shell
+``` shell
 mix test
 ```
 
