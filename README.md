@@ -19,7 +19,7 @@ Starting the HTTP API:
 
 `` shell
 mix server
-``
+```
 
 ### Testing things
 
