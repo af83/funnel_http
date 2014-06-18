@@ -146,7 +146,7 @@ defmodule FunnelHttp.Router do
   defp respond_with({:ok, conn}, :river) do
     conn = send_chunked(conn, 200)
     Funnel.register(conn, conn.assigns[:token], conn.params[:last_id])
-    conn
+    :timer.sleep(:infinity)
   end
 
   defp respond_with({:ok, conn}, :query_find) do
