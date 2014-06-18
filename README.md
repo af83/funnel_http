@@ -13,6 +13,20 @@ new document matching this query is available.
 
 ## Doing things
 
+### Running things
+
+Starting the HTTP API:
+
+`` shell
+mix server
+``
+
+### Testing things
+
+`` shell
+mix test
+```
+
 ### Register
 
 A user, or a device, can register to funnel by using the `/register` endpoint.
