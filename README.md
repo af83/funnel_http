@@ -1,5 +1,7 @@
 # Funnel
 
+[![Build Status](https://travis-ci.org/AF83/funnel_http.png?branch=master)](https://travis-ci.org/AF83/funnel_http)
+
 Funnel is for building Streaming APIs build upon ElasticSearch’s
 [percolation](http://www.elasticsearch.org/guide/en/elasticsearch/reference/current/search-percolate.html).
 
