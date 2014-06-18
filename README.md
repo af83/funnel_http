@@ -17,7 +17,7 @@ new document matching this query is available.
 
 Starting the HTTP API:
 
-`` shell
+``` shell
 mix server
 ```
 
