@@ -110,7 +110,8 @@ defmodule FunnelHttp.Router do
   end
 
   defp respond_with({:ok, conn}, :index_creation) do
-    {status_code, body} = req_body(conn) |> Funnel.Index.create
+    {:ok, body, conn} = read_body(conn)
+    {status_code, body} = body |> Funnel.Index.create
     respond_with({:ok, conn}, status_code, body)
   end
 
@@ -120,12 +121,14 @@ defmodule FunnelHttp.Router do
   end
 
   defp respond_with({:ok, conn}, :query_creation) do
-    {status_code, body} = Funnel.Query.create(conn.assigns[:index_id], conn.assigns[:token], req_body(conn))
+    {:ok, body, conn} = read_body(conn)
+    {status_code, body} = Funnel.Query.create(conn.assigns[:index_id], conn.assigns[:token], body)
     respond_with({:ok, conn}, status_code, body)
   end
 
   defp respond_with({:ok, conn}, :query_update) do
-    {status_code, body} = Funnel.Query.update(conn.assigns[:index_id], conn.assigns[:token], conn.assigns[:query_id], req_body(conn))
+    {:ok, body, conn} = read_body(conn)
+    {status_code, body} = Funnel.Query.update(conn.assigns[:index_id], conn.assigns[:token], conn.assigns[:query_id], body)
     respond_with({:ok, conn}, status_code, body)
   end
 
@@ -135,7 +138,8 @@ defmodule FunnelHttp.Router do
   end
 
   defp respond_with({:ok, conn}, :feeding) do
-    Funnel.percolate(conn.assigns[:index_id], req_body(conn))
+    {:ok, body, conn} = read_body(conn)
+    Funnel.percolate(conn.assigns[:index_id], body)
     respond_with({:ok, conn}, 204, "")
   end
 
@@ -171,11 +175,6 @@ defmodule FunnelHttp.Router do
       nil   -> {:unauthenticated, conn}
       token -> {:ok, assign(conn, :token, token)}
     end
-  end
-
-  defp req_body(conn) do
-    {_, %{req_body: req_body}} = conn.adapter
-    req_body
   end
 
   defp get_header(headers, key) do
