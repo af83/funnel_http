@@ -104,36 +104,36 @@ defmodule FunnelHttp.Router do
   end
 
   defp respond_with({:ok, conn}, :register) do
-    token = Funnel.register conn
+    {:ok, token} = Funnel.register conn
     {:ok, response} = JSEX.encode([token: token])
     respond_with({:ok, conn}, 201, response)
   end
 
   defp respond_with({:ok, conn}, :index_creation) do
     {:ok, body, conn} = read_body(conn)
-    {status_code, body} = body |> Funnel.Index.create
+    {:ok, status_code, body} = body |> Funnel.Index.create
     respond_with({:ok, conn}, status_code, body)
   end
 
   defp respond_with({:ok, conn}, :index_destroy) do
-    {status_code, body} = Funnel.Index.destroy(conn.assigns[:index_id])
+    {:ok, status_code, body} = Funnel.Index.destroy(conn.assigns[:index_id])
     respond_with({:ok, conn}, status_code, body)
   end
 
   defp respond_with({:ok, conn}, :query_creation) do
     {:ok, body, conn} = read_body(conn)
-    {status_code, body} = Funnel.Query.create(conn.assigns[:index_id], conn.assigns[:token], body)
+    {:ok, status_code, body} = Funnel.Query.create(conn.assigns[:index_id], conn.assigns[:token], body)
     respond_with({:ok, conn}, status_code, body)
   end
 
   defp respond_with({:ok, conn}, :query_update) do
     {:ok, body, conn} = read_body(conn)
-    {status_code, body} = Funnel.Query.update(conn.assigns[:index_id], conn.assigns[:token], conn.assigns[:query_id], body)
+    {:ok, status_code, body} = Funnel.Query.update(conn.assigns[:index_id], conn.assigns[:token], conn.assigns[:query_id], body)
     respond_with({:ok, conn}, status_code, body)
   end
 
   defp respond_with({:ok, conn}, :query_destroy) do
-    {status_code, body} = Funnel.Query.destroy(conn.assigns[:index_id], conn.assigns[:token], conn.assigns[:query_id])
+    {:ok, status_code, body} = Funnel.Query.destroy(conn.assigns[:index_id], conn.assigns[:token], conn.assigns[:query_id])
     respond_with({:ok, conn}, status_code, body)
   end
 
@@ -153,12 +153,12 @@ defmodule FunnelHttp.Router do
   end
 
   defp respond_with({:ok, conn}, :query_find) do
-    {status_code, body} = Funnel.Query.find(conn.assigns[:token])
+    {:ok, status_code, body} = Funnel.Query.find(conn.assigns[:token])
     respond_with({:ok, conn}, status_code, body)
   end
 
   defp respond_with({:ok, conn}, :query_find_for_index) do
-    {status_code, body} = Funnel.Query.find(conn.assigns[:token], %{index_id: conn.assigns[:index_id]})
+    {:ok, status_code, body} = Funnel.Query.find(conn.assigns[:token], %{index_id: conn.assigns[:index_id]})
     respond_with({:ok, conn}, status_code, body)
   end
 
