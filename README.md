@@ -46,6 +46,15 @@ curl -XPOST "http://localhost:4000/index" -d '{"settings" : {"number_of_shards" 
 {"index_id":"bfa3e5b02e554b458165815968ed490b","body":{"ok":true,"acknowledged":true}}
 ```
 
+An index can be destroy:
+
+``` shell
+curl -XDELETE "http://localhost:4000/index/bfa3e5b02e554b458165815968ed490b"
+```
+``` json
+{"found":true,"_index":"ed78ca7c475449a59fa70ecc90ea0634_dev","_type":".percolator","_id":"0f415001bc774a129921c4d929e3cd7c-14e8a26c56d04db2a1829d289ca7e91c","_version":3}
+```
+
 ### Query
 
 #### Adding query
@@ -58,10 +67,30 @@ A query is defined by a user's token, a name, and a json string representing the
 elasticsearch query.
 
 ``` shell
-curl -XPOST "http://localhost:4000/index/bfa3e5b02e554b458165815968ed490b" -d '{"query" : {"term" : {"field1" : "value1"}}}'
+curl -XPOST "http://localhost:4000/index/bfa3e5b02e554b458165815968ed490b/queries" -d '{"query" : {"term" : {"field1" : "value1"}}}'
 ```
 ``` json
-{"query_id":"dac278b8a6904b469d85df0773d16f5a","body":{"ok":true,"_index":"_percolator","_type":"bfa3e5b02e554b458165815968ed490b_dev","_id":"7d0ac81fbdd646dd9e883e3b007ce58d-dac278b8a6904b469d85df0773d16f5a","_version":1}}
+{"query_id":"c4d92d29273a4bec9618c65c3c33e9db","index_id":"ed78ca7c475449a59fa70ecc90ea0634","body":{"_id":"0f415001bc774a129921c4d929e3cd7c-c4d92d29273a4bec9618c65c3c33e9db","_index":"ed78ca7c475449a59fa70ecc90ea0634_dev","_type":".percolator","_version":1,"created":true}}
+```
+
+#### Updating a query
+
+``` shell
+curl -XPOST "http://localhost:4000/index/bfa3e5b02e554b458165815968ed490b/queries/c4d92d29273a4bec9618c65c3c33e9db" -d '{"query" : {"term" : {"field1" : "value1"}}}'
+```
+
+``` json
+{"query_id":"c4d92d29273a4bec9618c65c3c33e9db","index_id":"ed78ca7c475449a59fa70ecc90ea0634","body":{"_id":"0f415001bc774a129921c4d929e3cd7c-c4d92d29273a4bec9618c65c3c33e9db","_index":"ed78ca7c475449a59fa70ecc90ea0634_dev","_type":".percolator","_version":1,"created":true}}
+```
+
+#### Deleting a query
+
+``` shell
+curl -XPOST "http://localhost:4000/index/bfa3e5b02e554b458165815968ed490b/queries/c4d92d29273a4bec9618c65c3c33e9db" -d '{"query" : {"term" : {"field1" : "value1"}}}'
+```
+
+``` json
+{"query_id":"c4d92d29273a4bec9618c65c3c33e9db","index_id":"ed78ca7c475449a59fa70ecc90ea0634","body":{"_id":"0f415001bc774a129921c4d929e3cd7c-c4d92d29273a4bec9618c65c3c33e9db","_index":"ed78ca7c475449a59fa70ecc90ea0634_dev","_type":".percolator","_version":1,"created":true}}
 ```
 
 #### Searching queries
@@ -72,7 +101,7 @@ Queries can be retrieved for a given `index_id` with the following:
 curl -XGET "http://localhost:4000/index/bfa3e5b02e554b458165815968ed490b/queries"
 ```
 ``` json
-[{"query_id":"dac278b8a6904b469d85df0773d16f5a","index_id":"bfa3e5b02e554b458165815968ed490b","score":1.4142135}]
+[{"query_id":"c4d92d29273a4bec9618c65c3c33e9db","index_id":"ed78ca7c475449a59fa70ecc90ea0634","score":1.0}]
 ```
 
 Queries can be retrieved for a given `token` with the following:
@@ -81,7 +110,7 @@ Queries can be retrieved for a given `token` with the following:
 curl -XGET "http://localhost:4000/queries"
 ```
 ``` json
-[{"query_id":"dac278b8a6904b469d85df0773d16f5a","index_id":"bfa3e5b02e554b458165815968ed490b","score":1.4142135}]
+[{"query_id":"c4d92d29273a4bec9618c65c3c33e9db","index_id":"ed78ca7c475449a59fa70ecc90ea0634","score":1.0}]
 ```
 
 ### Submiting documents
@@ -105,7 +134,7 @@ Rivers uses Server-sent events to maintain an open connection.
 
 ``` shell
 curl "http://localhost:4000/river?token=7d0ac81fbdd646dd9e883e3b007ce58d"
-data: {"query_id":"dac278b8a6904b469d85df0773d16f5a","body":"{\"doc\":{\"field1\" :\"value1\"}}"}
+data: {"query_ids":["c4d92d29273a4bec9618c65c3c33e9db"],"body":"{\"doc\":{\"field1\":\"value1\"}}"}
 ```
 
 River provides a local cache. If a `last_id` params is given, any item more
