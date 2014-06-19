@@ -4,9 +4,10 @@ defmodule FunnelHttpTest do
 
   @opts FunnelHttp.Router.init([])
 
-  teardown _context do
-    Funnel.Es.destroy("funnel")
-    :ok
+  setup_all do
+    on_exit fn ->
+      Funnel.Es.destroy("funnel")
+    end
   end
 
   def headers do
