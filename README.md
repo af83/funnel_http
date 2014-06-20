@@ -22,7 +22,7 @@ Elixir must be installed.
 Starting the HTTP API:
 
 ``` shell
-mix do deps.get, server
+mix do deps.get, deps.compile, server
 ```
 
 ### Testing things
