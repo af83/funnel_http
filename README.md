@@ -15,12 +15,14 @@ new document matching this query is available.
 
 ## Doing things
 
+Elixir mus be installed.
+
 ### Running things
 
 Starting the HTTP API:
 
 ``` shell
-mix server
+mix do deps.get, server
 ```
 
 ### Testing things
