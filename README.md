@@ -15,7 +15,7 @@ new document matching this query is available.
 
 ## Doing things
 
-Elixir mus be installed.
+Elixir must be installed.
 
 ### Running things
 
