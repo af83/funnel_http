@@ -20,7 +20,7 @@ defmodule FunnelHttp.Mixfile do
     [
       {:cowboy, github: "extend/cowboy"},
       {:plug, "~> 0.5"},
-      {:funnel, github: "AF83/funnel", branch: "undynamo"}
+      {:funnel, github: "AF83/funnel"}
     ]
   end
 end
