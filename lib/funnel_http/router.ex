@@ -90,22 +90,24 @@ defmodule FunnelHttp.Router do
   end
 
   defp respond_with({:ok, conn}, status, response) do
-    send_resp(conn, status, response)
+    {:ok, body} = JSEX.encode(response)
+    send_resp(conn, status, body)
   end
 
   defp respond_with({:unauthenticated, conn}, _status, _response) do
-    {:ok, response} = JSEX.encode([error: "Unauthenticated"])
+    response = %{:error => "Unauthenticated"}
     send_resp(conn, 400, response)
   end
 
   defp respond_with({:ok, conn}, :status) do
     %{body: body, headers: _headers, status_code: status_code} = Funnel.Es.get("/")
+    {:ok, body} = JSEX.decode(body)
     respond_with({:ok, conn}, status_code, body)
   end
 
   defp respond_with({:ok, conn}, :register) do
     {:ok, token} = Funnel.register conn
-    {:ok, response} = JSEX.encode([token: token])
+    response = %{:token => token}
     respond_with({:ok, conn}, 201, response)
   end
 
