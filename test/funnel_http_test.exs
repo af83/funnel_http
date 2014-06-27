@@ -382,7 +382,7 @@ defmodule FunnelHttpTest do
     {:ok, response} = JSEX.decode(conn.resp_body)
 
     assert conn.state == :sent
-    assert conn.status == 200
+    assert conn.status == 404
     assert Enum.count(response) == 0
   end
 
