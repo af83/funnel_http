@@ -81,24 +81,24 @@ Adding queries is done by using the `/query` endpoint. The payload must
 comply with the funnel's query serialization. These entries can accept a single
 query, or a list of queries.
 
-A query is defined by a user's token, a name, and a json string representing the
-elasticsearch query.
+A query is defined by a user's token, a set of metadata, and the elasticsearch
+query. `metadata` and `query` are mandatory.
 
 ``` shell
-curl -XPOST "http://localhost:4000/index/bfa3e5b02e554b458165815968ed490b/queries" -d '{"query" : {"term" : {"field1" : "value1"}}}'
+curl -XPOST "http://localhost:4000/index/bfa3e5b02e554b458165815968ed490b/queries" -d '{"query":{query" : {"term" : {"field1" : "value1"}}}, "metadata":{"name":"Awesome Query"}}'
 ```
 ``` json
-{"query_id":"c4d92d29273a4bec9618c65c3c33e9db","index_id":"ed78ca7c475449a59fa70ecc90ea0634","body":{"_id":"0f415001bc774a129921c4d929e3cd7c-c4d92d29273a4bec9618c65c3c33e9db","_index":"ed78ca7c475449a59fa70ecc90ea0634_dev","_type":".percolator","_version":1,"created":true}}
+{"query_id":"c4d92d29273a4bec9618c65c3c33e9db","index_id":"ed78ca7c475449a59fa70ecc90ea0634","metadata":{"name":"Awesome Query"}}
 ```
 
 #### Updating a query
 
 ``` shell
-curl -XPOST "http://localhost:4000/index/bfa3e5b02e554b458165815968ed490b/queries/c4d92d29273a4bec9618c65c3c33e9db" -d '{"query" : {"term" : {"field1" : "value1"}}}'
+curl -XPOST "http://localhost:4000/index/bfa3e5b02e554b458165815968ed490b/queries/c4d92d29273a4bec9618c65c3c33e9db" -d '{"query":{"query" : {"term" : {"field1" : "value1"}}},"metadata":{"name":"Awesome Query"}}'
 ```
 
 ``` json
-{"query_id":"c4d92d29273a4bec9618c65c3c33e9db","index_id":"ed78ca7c475449a59fa70ecc90ea0634","body":{"_id":"0f415001bc774a129921c4d929e3cd7c-c4d92d29273a4bec9618c65c3c33e9db","_index":"ed78ca7c475449a59fa70ecc90ea0634_dev","_type":".percolator","_version":1,"created":true}}
+{"query_id":"c4d92d29273a4bec9618c65c3c33e9db","index_id":"ed78ca7c475449a59fa70ecc90ea0634","metadata":{"name":"Awesome Query"}}
 ```
 
 #### Deleting a query
