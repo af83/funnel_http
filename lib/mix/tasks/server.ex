@@ -19,6 +19,7 @@ defmodule Mix.Tasks.Server do
       opts = Keyword.update!(opts, :port, &String.to_integer(&1))
     end
 
+    Mix.Task.run "app.start", args
     FunnelHttp.run(opts)
 
     unless Code.ensure_loaded?(IEx) && IEx.started? do

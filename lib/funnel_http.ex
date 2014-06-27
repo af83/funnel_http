@@ -8,7 +8,6 @@ defmodule FunnelHttp do
   end
 
   def run(opts) do
-    FunnelHttp.Supervisor.start_link
     port = Keyword.get(opts, :port, 4000)
     IO.puts "Running Funnel with Cowboy on http://localhost:#{port}"
     Plug.Adapters.Cowboy.http FunnelHttp.Router, [], opts
