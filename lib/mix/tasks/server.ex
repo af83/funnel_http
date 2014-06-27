@@ -16,7 +16,7 @@ defmodule Mix.Tasks.Server do
     opts = OptionParser.parse(args, aliases: [p: :port]) |> elem(0)
 
     if opts[:port] do
-      opts = Keyword.update!(opts, :port, &binary_to_integer(&1))
+      opts = Keyword.update!(opts, :port, &String.to_integer(&1))
     end
 
     FunnelHttp.run(opts)
