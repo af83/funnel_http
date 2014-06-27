@@ -163,11 +163,13 @@ defmodule FunnelHttp.Router do
 
   defp respond_with({:ok, conn}, :query_find) do
     {:ok, status_code, body} = Funnel.Query.find(conn.assigns[:token])
+    body = serialize_queries(body)
     respond_with({:ok, conn}, status_code, body)
   end
 
   defp respond_with({:ok, conn}, :query_find_for_index) do
     {:ok, status_code, body} = Funnel.Query.find(conn.assigns[:token], %{index_id: conn.assigns[:index_id]})
+    body = serialize_queries(body)
     respond_with({:ok, conn}, status_code, body)
   end
 
@@ -205,6 +207,15 @@ defmodule FunnelHttp.Router do
 
   defp validate({:unauthenticated, conn}, _method) do
     {:unauthenticated, conn}
+  end
+
+  defp serialize_queries(queries) do
+    Enum.map(queries, &serialize_query/1)
+  end
+
+  defp serialize_query(query) do
+    {:ok, _id, metadata} = FunnelHttp.Query.Registry.find(query["query_id"])
+    %{:index_id => query["index_id"], :query_id => query["query_id"], :metadata => metadata}
   end
 
   defp get_header(headers, key) do

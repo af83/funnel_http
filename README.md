@@ -119,7 +119,7 @@ Queries can be retrieved for a given `index_id` with the following:
 curl -XGET "http://localhost:4000/index/bfa3e5b02e554b458165815968ed490b/queries"
 ```
 ``` json
-[{"query_id":"c4d92d29273a4bec9618c65c3c33e9db","index_id":"ed78ca7c475449a59fa70ecc90ea0634","score":1.0}]
+[{"query_id":"c4d92d29273a4bec9618c65c3c33e9db","index_id":"ed78ca7c475449a59fa70ecc90ea0634","metadata":{"name":"Awesome Query"}}]
 ```
 
 Queries can be retrieved for a given `token` with the following:
@@ -128,7 +128,7 @@ Queries can be retrieved for a given `token` with the following:
 curl -XGET "http://localhost:4000/queries"
 ```
 ``` json
-[{"query_id":"c4d92d29273a4bec9618c65c3c33e9db","index_id":"ed78ca7c475449a59fa70ecc90ea0634","score":1.0}]
+[{"query_id":"c4d92d29273a4bec9618c65c3c33e9db","index_id":"ed78ca7c475449a59fa70ecc90ea0634","metadata":{"name":"Awesome Query"}]
 ```
 
 ### Submiting documents

@@ -370,6 +370,8 @@ defmodule FunnelHttpTest do
     {_status, response} = Funnel.Es.register("funnel", token, query)
     {:ok, body} = JSEX.decode response
     query_id =  body["query_id"]
+    metadata = %{"name" => "Plop"}
+    FunnelHttp.Query.Registry.insert(query_id, metadata)
     Funnel.Es.refresh
 
     conn = conn(:get, "/queries?token=#{token}", "", headers: authenticate_headers)
@@ -380,6 +382,7 @@ defmodule FunnelHttpTest do
 
     assert Enum.count(response) == 1
     assert query["query_id"] == query_id
+    assert query["metadata"] == metadata
     assert conn.state == :sent
     assert conn.status == 200
   end
@@ -387,8 +390,16 @@ defmodule FunnelHttpTest do
   test "find queries based on token on several indexes" do
     query = '{"query" : {"term" : {"field1" : "value1"}}}' |> IO.iodata_to_binary
     token = "query_find"
-    Funnel.Es.register("several_indexes", token, query)
-    Funnel.Es.register("funnel", token, query)
+    {_status, response} = Funnel.Es.register("several_indexes", token, query)
+    {:ok, body} = JSEX.decode response
+    query_id =  body["query_id"]
+    metadata = %{"name" => "Plop"}
+    FunnelHttp.Query.Registry.insert(query_id, metadata)
+    {_status, response} = Funnel.Es.register("funnel", token, query)
+    {:ok, body} = JSEX.decode response
+    query_id =  body["query_id"]
+    metadata = %{"name" => "Plop"}
+    FunnelHttp.Query.Registry.insert(query_id, metadata)
     Funnel.Es.refresh
 
     conn = conn(:get, "/queries", "", headers: authenticate_headers(token))
@@ -418,7 +429,11 @@ defmodule FunnelHttpTest do
     query = '{"query" : {"term" : {"field1" : "value1"}}}' |> IO.iodata_to_binary
     token = "query_find_mono_index"
     Funnel.Es.register("mono_index", token, query)
-    Funnel.Es.register("funneler", token, query)
+    {_status, response} = Funnel.Es.register("funneler", token, query)
+    {:ok, body} = JSEX.decode response
+    query_id =  body["query_id"]
+    metadata = %{"name" => "Plop"}
+    FunnelHttp.Query.Registry.insert(query_id, metadata)
     Funnel.Es.refresh
 
     conn = conn(:get, "/index/funneler/queries?token=#{token}", "", headers: authenticate_headers)
