@@ -104,11 +104,11 @@ curl -XPOST "http://localhost:4000/index/bfa3e5b02e554b458165815968ed490b/querie
 #### Deleting a query
 
 ``` shell
-curl -XPOST "http://localhost:4000/index/bfa3e5b02e554b458165815968ed490b/queries/c4d92d29273a4bec9618c65c3c33e9db" -d '{"query" : {"term" : {"field1" : "value1"}}}'
+curl -XDELETE "http://localhost:4000/index/bfa3e5b02e554b458165815968ed490b/queries/c4d92d29273a4bec9618c65c3c33e9db"
 ```
 
 ``` json
-{"query_id":"c4d92d29273a4bec9618c65c3c33e9db","index_id":"ed78ca7c475449a59fa70ecc90ea0634","body":{"_id":"0f415001bc774a129921c4d929e3cd7c-c4d92d29273a4bec9618c65c3c33e9db","_index":"ed78ca7c475449a59fa70ecc90ea0634_dev","_type":".percolator","_version":1,"created":true}}
+{"acknowledged":true}
 ```
 
 #### Searching queries
