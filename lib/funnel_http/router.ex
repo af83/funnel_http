@@ -35,6 +35,7 @@ defmodule FunnelHttp.Router do
     {:ok, assign(conn, :index_id, index_id)}
       |> authenticate
       |> set_content_type
+      |> validate(:query)
       |> respond_with(:query_creation)
   end
 
@@ -49,6 +50,7 @@ defmodule FunnelHttp.Router do
     {:ok, assign(conn, :index_id, index_id) |> assign(:query_id, query_id)}
       |> authenticate
       |> set_content_type
+      |> validate(:query)
       |> respond_with(:query_update)
   end
 
@@ -123,19 +125,24 @@ defmodule FunnelHttp.Router do
   end
 
   defp respond_with({:ok, conn}, :query_creation) do
-    {:ok, body, conn} = read_body(conn)
+    {:ok, body} = JSEX.encode(conn.assigns[:payload]["query"])
     {:ok, status_code, body} = Funnel.Query.create(conn.assigns[:index_id], conn.assigns[:token], body)
+    {:ok, _id, metadata} = FunnelHttp.Query.Registry.insert(body["query_id"], conn.assigns[:payload]["metadata"])
+    body = %{:query_id => body["query_id"], :index_id => body["index_id"], :metadata => metadata}
     respond_with({:ok, conn}, status_code, body)
   end
 
   defp respond_with({:ok, conn}, :query_update) do
-    {:ok, body, conn} = read_body(conn)
+    {:ok, body} = JSEX.encode(conn.assigns[:payload]["query"])
     {:ok, status_code, body} = Funnel.Query.update(conn.assigns[:index_id], conn.assigns[:token], conn.assigns[:query_id], body)
+    {:ok, _id, metadata} = FunnelHttp.Query.Registry.insert(body["query_id"], conn.assigns[:payload]["metadata"])
+    body = %{:query_id => body["query_id"], :index_id => body["index_id"], :metadata => metadata}
     respond_with({:ok, conn}, status_code, body)
   end
 
   defp respond_with({:ok, conn}, :query_destroy) do
     {:ok, status_code, body} = Funnel.Query.destroy(conn.assigns[:index_id], conn.assigns[:token], conn.assigns[:query_id])
+    FunnelHttp.Query.Registry.delete(conn.assigns[:query_id])
     respond_with({:ok, conn}, status_code, body)
   end
 
@@ -174,12 +181,30 @@ defmodule FunnelHttp.Router do
     send_resp(conn, 400, response)
   end
 
+  defp respond_with({:invalid, conn, message}, _method) do
+    {:ok, response} = JSEX.encode([error: message])
+    send_resp(conn, 422, response)
+  end
+
   defp authenticate({:ok, conn}) do
     conn = Plug.Conn.fetch_params(conn)
     case conn.params["token"] || get_header(conn.req_headers, "authorization") do
       nil   -> {:unauthenticated, conn}
       token -> {:ok, assign(conn, :token, token)}
     end
+  end
+
+  defp validate({:ok, conn}, :query) do
+    {:ok, body, conn} = read_body(conn)
+    {:ok, payload} = JSEX.decode(body)
+    case payload["query"] && payload["metadata"] do
+      nil -> {:invalid, conn, "`query` and `metadata` keys must be present."}
+      _   -> {:ok, assign(conn, :payload, payload)}
+    end
+  end
+
+  defp validate({:unauthenticated, conn}, _method) do
+    {:unauthenticated, conn}
   end
 
   defp get_header(headers, key) do
