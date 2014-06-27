@@ -70,7 +70,7 @@ defmodule FunnelHttp.Router do
   get "/river" do
     {:ok, conn}
       |> authenticate
-      |> set_content_type
+      |> set_content_type("text/event-streami")
       |> respond_with(:river)
   end
 
@@ -87,8 +87,8 @@ defmodule FunnelHttp.Router do
       |> respond_with(:not_found)
   end
 
-  defp set_content_type({result, conn}) do
-    {result, put_resp_content_type(conn, "application/json")}
+  defp set_content_type({result, conn}, content_type \\ "application/json") do
+    {result, put_resp_content_type(conn, content_type)}
   end
 
   defp respond_with({:ok, conn}, status, response) do
