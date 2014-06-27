@@ -364,6 +364,28 @@ defmodule FunnelHttpTest do
     assert response["error"] == "Unauthenticated"
   end
 
+  test "find queries with a token, but without any results" do
+    conn = conn(:get, "/queries", "", headers: authenticate_headers)
+    conn = FunnelHttp.Router.call(conn, @opts)
+
+    {:ok, response} = JSEX.decode(conn.resp_body)
+
+    assert conn.state == :sent
+    assert conn.status == 200
+    assert Enum.count(response) == 0
+  end
+
+  test "find queries with a token, but with on a fake index" do
+    conn = conn(:get, "/index/doesnotexists/queries", "", headers: authenticate_headers)
+    conn = FunnelHttp.Router.call(conn, @opts)
+
+    {:ok, response} = JSEX.decode(conn.resp_body)
+
+    assert conn.state == :sent
+    assert conn.status == 200
+    assert Enum.count(response) == 0
+  end
+
   test "find queries based on token" do
     query = '{"query" : {"term" : {"field1" : "value1"}}}' |> IO.iodata_to_binary
     token = "query_find"
