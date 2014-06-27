@@ -3,7 +3,7 @@ defmodule FunnelHttp.Query.RegistryTest do
 
   setup do
     on_exit fn ->
-      FunnelHttp.Query.Registry.destroy_db
+      File.rm Path.expand("db/queries_#{Mix.env}.dets")
     end
   end
 

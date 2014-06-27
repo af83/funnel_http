@@ -21,10 +21,6 @@ defmodule FunnelHttp.Query.Registry do
     {:ok}
   end
 
-  def destroy_db do
-    File.rm(@dets_file)
-  end
-
   def insert(uuid, metadata) do
     GenServer.call(QueryRegistry, {:insert, uuid, metadata})
   end
