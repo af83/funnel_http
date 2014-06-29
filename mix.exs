@@ -19,7 +19,7 @@ defmodule FunnelHttp.Mixfile do
   defp deps do
     [
       {:cowboy, github: "extend/cowboy"},
-      {:plug, "~> 0.5"},
+      {:plug,   github: "elixir-lang/plug"},
       {:funnel, github: "AF83/funnel"}
     ]
   end
