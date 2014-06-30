@@ -93,11 +93,13 @@ defmodule FunnelHttp.Router do
 
   defp respond_with({:ok, conn}, status, response) do
     {:ok, body} = JSEX.encode(response)
+    log(conn, status)
     send_resp(conn, status, body)
   end
 
   defp respond_with({:unauthenticated, conn}, _status, _response) do
     response = %{:error => "Unauthenticated"}
+    log(conn, 400)
     send_resp(conn, 400, response)
   end
 
@@ -185,6 +187,7 @@ defmodule FunnelHttp.Router do
 
   defp respond_with({:invalid, conn, message}, _method) do
     {:ok, response} = JSEX.encode([error: message])
+    log(conn, 422)
     send_resp(conn, 422, response)
   end
 
@@ -223,5 +226,11 @@ defmodule FunnelHttp.Router do
       {^key, value} -> value
       nil -> nil
     end
+  end
+
+  defp log(conn, status) do
+    path = Enum.join(conn.path_info, "/")
+    date = Timex.Date.now |> Timex.DateFormat.format!("{ISO}")
+    IO.inspect("[#{date}] Respond to #{path} with #{status} code")
   end
 end
