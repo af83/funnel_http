@@ -20,6 +20,7 @@ defmodule FunnelHttp.Mixfile do
     [
       {:cowboy, github: "extend/cowboy"},
       {:plug, "~> 0.5"},
+      {:timex,  github: "bitwalker/timex"},
       {:funnel, github: "AF83/funnel"}
     ]
   end

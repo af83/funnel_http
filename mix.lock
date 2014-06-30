@@ -8,4 +8,5 @@
   "plug": {:package, "0.5.1"},
   "poolboy": {:package, "1.2.1"},
   "ranch": {:git, "git://github.com/extend/ranch.git", "3189ef2d47843945efc96c224963380462c33d40", [ref: "0.10.0"]},
+  "timex": {:git, "git://github.com/bitwalker/timex.git", "7e7313e052463ac92f4aacf1845234d2d2832dee", []},
   "uuid": {:git, "git://github.com/travis/erlang-uuid.git", "f6a1cf9027e4af78b4a81201f4f6db1a822b8316", []}}
