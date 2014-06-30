@@ -5,7 +5,7 @@
   "ibrowse": {:git, "git://github.com/cmullaparthi/ibrowse.git", "7871e2ebe8811efb64e1917e2de455fa87e8dfe3", [tag: "v4.1.0"]},
   "jsex": {:package, "2.0.0"},
   "jsx": {:package, "2.0.4"},
-  "plug": {:git, "git://github.com/elixir-lang/plug.git", "dfc5291563aaa470ebfb5ab6d33f42b9b6ef502c", []},
+  "plug": {:package, "0.5.1"},
   "poolboy": {:package, "1.2.1"},
   "ranch": {:git, "git://github.com/extend/ranch.git", "3189ef2d47843945efc96c224963380462c33d40", [ref: "0.10.0"]},
   "uuid": {:git, "git://github.com/travis/erlang-uuid.git", "f6a1cf9027e4af78b4a81201f4f6db1a822b8316", []}}
