@@ -70,7 +70,7 @@ defmodule FunnelHttp.Router do
   get "/river" do
     {:ok, conn}
       |> authenticate
-      |> set_content_type("text/event-streami")
+      |> set_content_type("text/event-stream")
       |> respond_with(:river)
   end
 
