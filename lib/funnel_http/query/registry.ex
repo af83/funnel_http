@@ -13,12 +13,7 @@ defmodule FunnelHttp.Query.Registry do
   end
 
   def init([]) do
-    :dets.open_file(:queries, [file: @dets_file, type: :set])
-  end
-
-  def terminate(_reason, queries) do
-    :dets.close(queries)
-    {:ok}
+    {:ok, nil}
   end
 
   def insert(uuid, metadata) do
@@ -33,19 +28,35 @@ defmodule FunnelHttp.Query.Registry do
     GenServer.call(QueryRegistry, {:delete, uuid})
   end
 
-  def handle_call({:insert, uuid, metadata}, _from, queries) do
-    {:reply, {:dets.insert(queries, {uuid, metadata}), uuid, metadata}, queries}
+  def handle_call({:insert, uuid, metadata}, _from, _) do
+    queries = open_db
+    :ok = :dets.insert(queries, {uuid, metadata})
+    close_db(queries)
+    {:reply, {:ok, uuid, metadata}, nil}
   end
 
-  def handle_call({:find, uuid}, _from, queries) do
+  def handle_call({:find, uuid}, _from, _) do
+    queries = open_db
     lookup = case :dets.lookup(queries, uuid) do
       [{uuid, metadata}] -> {:ok, uuid, metadata}
       []                 -> {:not_found, uuid, nil}
     end
-    {:reply, lookup, queries}
+    {:reply, lookup, nil}
   end
 
   def handle_call({:delete, uuid}, _from, queries) do
-    {:reply, {:dets.delete(queries, uuid), uuid}, queries}
+    queries = open_db
+    query = :dets.delete(queries, uuid)
+    close_db(queries)
+    {:reply, {query, uuid}, nil}
+  end
+
+  defp close_db(queries) do
+    :dets.close(queries)
+  end
+
+  defp open_db do
+    {:ok, queries} = :dets.open_file(:queries, [file: @dets_file, type: :set])
+    queries
   end
 end
