@@ -6,7 +6,7 @@ defimpl Funnel.Transport, for: Elixir.Plug.Conn do
     item = %{queries: queries, body: item[:body]}
     {:ok, item} = JSEX.encode(item)
 
-    chunk conn, EventStreamMessage.to_message(id, item)
+    chunk conn, EventSourceEncoder.encode(id, item)
   end
 
   defp to_query(id) do
