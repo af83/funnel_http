@@ -1,6 +1,6 @@
 %{"cowboy": {:git, "git://github.com/extend/cowboy.git", "73f65d5a757dacf952887a32bc611be78773c33f", []},
   "cowlib": {:git, "git://github.com/extend/cowlib.git", "e2ffefe828b918486e2cd76e44c54ae9b62c616e", [ref: "0.6.2"]},
-  "event_source_encoder": {:git, "git://github.com/chatgris/event_source_encoder.git", "43873c3156060241fe3c284c9e39aae5210acdd3", []},
+  "event_source_encoder": {:package, "0.0.1"},
   "funnel": {:package, "0.0.1"},
   "httpotion": {:git, "git://github.com/myfreeweb/httpotion.git", "a6bcbbac7b6f15ee93c5c941de36d59ef8c85743", []},
   "ibrowse": {:git, "git://github.com/cmullaparthi/ibrowse.git", "7871e2ebe8811efb64e1917e2de455fa87e8dfe3", [tag: "v4.1.0"]},

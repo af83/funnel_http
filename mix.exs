@@ -24,7 +24,7 @@ defmodule FunnelHttp.Mixfile do
       {:funnel, "~> 0.0.1"},
       {:httpotion,   github: "myfreeweb/httpotion" },
       {:uuid,        github: "travis/erlang-uuid" },
-      {:event_source_encoder, github: "chatgris/event_source_encoder"}
+      {:event_source_encoder, "~> 0.0.1"}
     ]
   end
 end
