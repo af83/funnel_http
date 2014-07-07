@@ -21,7 +21,9 @@ defmodule FunnelHttp.Mixfile do
       {:cowboy, github: "extend/cowboy"},
       {:plug, "~> 0.5"},
       {:timex,  github: "bitwalker/timex"},
-      {:funnel, github: "AF83/funnel"},
+      {:funnel, "~> 0.0.1"},
+      {:httpotion,   github: "myfreeweb/httpotion" },
+      {:uuid,        github: "travis/erlang-uuid" },
       {:event_source_encoder, github: "chatgris/event_source_encoder"}
     ]
   end
