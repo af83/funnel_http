@@ -20,7 +20,7 @@ defmodule FunnelHttp.Mixfile do
     [
       {:cowboy, github: "extend/cowboy"},
       {:plug, "~> 0.5"},
-      {:timex,  github: "bitwalker/timex"},
+      {:timex,  "~> 0.10"},
       {:funnel, "~> 0.0.1"},
       {:httpotion,   github: "myfreeweb/httpotion" },
       {:uuid,        github: "travis/erlang-uuid" },
