@@ -18,12 +18,12 @@ defmodule FunnelHttp.Mixfile do
 
   defp deps do
     [
-      {:cowboy, github: "extend/cowboy"},
-      {:plug, "~> 0.5"},
-      {:timex,  "~> 0.10"},
-      {:funnel, "~> 0.0.1"},
-      {:httpotion,   github: "myfreeweb/httpotion" },
-      {:uuid,        github: "travis/erlang-uuid" },
+      {:cowboy,               github: "extend/cowboy"},
+      {:plug,                 "~> 0.5"},
+      {:timex,                "~> 0.10"},
+      {:funnel,               "~> 0.0.1"},
+      {:httpotion,            github: "myfreeweb/httpotion"},
+      {:uuid,                 github: "travis/erlang-uuid"},
       {:event_source_encoder, "~> 0.0.1"}
     ]
   end
