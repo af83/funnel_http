@@ -17,52 +17,31 @@ defmodule FunnelHttp.Router do
       |> respond_with(:register)
   end
 
-  post "/index" do
+  post "/queries" do
     {:ok, conn}
-      |> authenticate
-      |> set_content_type
-      |> respond_with(:index_creation)
-  end
-
-  delete "/index/:index_id" do
-    {:ok, assign(conn, :index_id, index_id)}
-      |> authenticate
-      |> set_content_type
-      |> respond_with(:index_destroy)
-  end
-
-  post "/index/:index_id/queries" do
-    {:ok, assign(conn, :index_id, index_id)}
       |> authenticate
       |> set_content_type
       |> validate(:query)
       |> respond_with(:query_creation)
   end
 
-  get "/index/:index_id/queries" do
-    {:ok, assign(conn, :index_id, index_id)}
-      |> authenticate
-      |> set_content_type
-      |> respond_with(:query_find_for_index)
-  end
-
-  put "/index/:index_id/queries/:query_id" do
-    {:ok, assign(conn, :index_id, index_id) |> assign(:query_id, query_id)}
+  put "/queries/:query_id" do
+    {:ok, assign(conn, :query_id, query_id)}
       |> authenticate
       |> set_content_type
       |> validate(:query)
       |> respond_with(:query_update)
   end
 
-  delete "/index/:index_id/queries/:query_id" do
-    {:ok, assign(conn, :index_id, index_id) |> assign(:query_id, query_id)}
+  delete "/queries/:query_id" do
+    {:ok, assign(conn, :query_id, query_id)}
       |> authenticate
       |> set_content_type
       |> respond_with(:query_destroy)
   end
 
-  post "/index/:index_id/feeding" do
-    {:ok, assign(conn, :index_id, index_id)}
+  post "/feeding" do
+    {:ok, conn}
       |> set_content_type
       |> respond_with(:feeding)
   end
@@ -115,42 +94,31 @@ defmodule FunnelHttp.Router do
     respond_with({:ok, conn}, 201, response)
   end
 
-  defp respond_with({:ok, conn}, :index_creation) do
-    {:ok, body, conn} = read_body(conn)
-    {:ok, status_code, body} = body |> Funnel.Index.create
-    respond_with({:ok, conn}, status_code, body)
-  end
-
-  defp respond_with({:ok, conn}, :index_destroy) do
-    {:ok, status_code, body} = Funnel.Index.destroy(conn.assigns[:index_id])
-    respond_with({:ok, conn}, status_code, body)
-  end
-
   defp respond_with({:ok, conn}, :query_creation) do
     {:ok, body} = JSEX.encode(conn.assigns[:payload]["query"])
-    {:ok, status_code, body} = Funnel.Query.create(conn.assigns[:index_id], conn.assigns[:token], body)
+    {:ok, status_code, body} = Funnel.Query.create("queries", conn.assigns[:token], body)
     {:ok, _id, metadata} = FunnelHttp.Query.Registry.insert(body["query_id"], conn.assigns[:payload]["metadata"])
-    body = %{:query_id => body["query_id"], :index_id => body["index_id"], :metadata => metadata}
+    body = %{:query_id => body["query_id"], :metadata => metadata}
     respond_with({:ok, conn}, status_code, body)
   end
 
   defp respond_with({:ok, conn}, :query_update) do
     {:ok, body} = JSEX.encode(conn.assigns[:payload]["query"])
-    {:ok, status_code, body} = Funnel.Query.update(conn.assigns[:index_id], conn.assigns[:token], conn.assigns[:query_id], body)
+    {:ok, status_code, body} = Funnel.Query.update("queries", conn.assigns[:token], conn.assigns[:query_id], body)
     {:ok, _id, metadata} = FunnelHttp.Query.Registry.insert(body["query_id"], conn.assigns[:payload]["metadata"])
-    body = %{:query_id => body["query_id"], :index_id => body["index_id"], :metadata => metadata}
+    body = %{:query_id => body["query_id"], :metadata => metadata}
     respond_with({:ok, conn}, status_code, body)
   end
 
   defp respond_with({:ok, conn}, :query_destroy) do
-    {:ok, status_code, body} = Funnel.Query.destroy(conn.assigns[:index_id], conn.assigns[:token], conn.assigns[:query_id])
+    {:ok, status_code, body} = Funnel.Query.destroy("queries", conn.assigns[:token], conn.assigns[:query_id])
     FunnelHttp.Query.Registry.delete(conn.assigns[:query_id])
     respond_with({:ok, conn}, status_code, body)
   end
 
   defp respond_with({:ok, conn}, :feeding) do
     {:ok, body, conn} = read_body(conn)
-    Funnel.percolate(conn.assigns[:index_id], body)
+    Funnel.percolate("queries", body)
     respond_with({:ok, conn}, 204, "")
   end
 
@@ -165,12 +133,6 @@ defmodule FunnelHttp.Router do
 
   defp respond_with({:ok, conn}, :query_find) do
     {:ok, status_code, body} = Funnel.Query.find(conn.assigns[:token])
-    body = serialize_queries(body)
-    respond_with({:ok, conn}, status_code, body)
-  end
-
-  defp respond_with({:ok, conn}, :query_find_for_index) do
-    {:ok, status_code, body} = Funnel.Query.find(conn.assigns[:token], %{index_id: conn.assigns[:index_id]})
     body = serialize_queries(body)
     respond_with({:ok, conn}, status_code, body)
   end
@@ -218,7 +180,7 @@ defmodule FunnelHttp.Router do
 
   defp serialize_query(query) do
     {:ok, _id, metadata} = FunnelHttp.Query.Registry.find(query["query_id"])
-    %{:index_id => query["index_id"], :query_id => query["query_id"], :metadata => metadata}
+    %{:query_id => query["query_id"], :metadata => metadata}
   end
 
   defp get_header(headers, key) do

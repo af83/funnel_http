@@ -57,104 +57,9 @@ defmodule FunnelHttpTest do
     assert response["token"] != nil
   end
 
-  test "does not allow to create an index without token" do
-    conn = conn(:post, "/index", "{\"settings\":\"stuff\"}", headers: headers)
-    conn = FunnelHttp.Router.call(conn, @opts)
-
-    {:ok, response} = JSEX.decode(conn.resp_body)
-
-    assert conn.state == :sent
-    assert conn.status == 400
-    assert response["token"] == nil
-    assert response["error"] == "Unauthenticated"
-  end
-
-  test "allow to create an index with token" do
-    Funnel.Es.destroy("funnel")
-    conn = conn(:post, "/index", "", headers: authenticate_headers)
-    conn = FunnelHttp.Router.call(conn, @opts)
-
-    {:ok, response} = JSEX.decode(conn.resp_body)
-    index_id = response["index_id"]
-
-    assert conn.state == :sent
-    assert conn.status == 200
-    assert conn.assigns[:token] != nil
-    assert index_id != nil
-    Funnel.Es.destroy(index_id)
-  end
-
-  test "allow to create an index with token and empty body" do
-    Funnel.Es.destroy("funnel")
-    conn = conn(:post, "/index", "", headers: authenticate_headers)
-    conn = FunnelHttp.Router.call(conn, @opts)
-
-    {:ok, response} = JSEX.decode(conn.resp_body)
-    index_id = response["index_id"]
-
-    assert conn.state == :sent
-    assert conn.status == 200
-    assert index_id != nil
-    assert conn.assigns[:token] != nil
-    Funnel.Es.destroy(index_id)
-  end
-
-  test "allow to create an index with token, and settings forwarding" do
-    settings = '{"settings" : {"number_of_shards" : 1},"mappings" : {"type1" : {"_source" : { "enabled" : false },"properties" : {"field1" : { "type" : "string", "index" : "not_analyzed" }}}}}' |> IO.iodata_to_binary
-    conn = conn(:post, "/index", settings, headers: authenticate_headers)
-    conn = FunnelHttp.Router.call(conn, @opts)
-
-    {:ok, response} = JSEX.decode(conn.resp_body)
-    index_id = response["index_id"]
-
-    assert conn.state == :sent
-    assert conn.status == 200
-    assert index_id != nil
-    assert conn.assigns[:token] != nil
-    Funnel.Es.destroy(index_id)
-  end
-
-  test "allow to destroy an index with token" do
-    settings = '{"settings" : {"number_of_shards" : 1},"mappings" : {"type1" : {"_source" : { "enabled" : false },"properties" : {"field1" : { "type" : "string", "index" : "not_analyzed" }}}}}' |> IO.iodata_to_binary
-    conn = conn(:post, "/index", settings, headers: authenticate_headers)
-    conn = FunnelHttp.Router.call(conn, @opts)
-
-    {:ok, response} = JSEX.decode(conn.resp_body)
-    index_id = response["index_id"]
-
-    conn = conn(:delete, "/index/#{index_id}", [], headers: authenticate_headers)
-    conn = FunnelHttp.Router.call(conn, @opts)
-
-    assert conn.state == :sent
-    assert conn.status == 200
-    assert conn.assigns[:index_id] == index_id
-    assert conn.assigns[:token] != nil
-    Funnel.Es.destroy(index_id)
-  end
-
-  test "does not allow to destroy an index without token" do
-    settings = '{"settings" : {"number_of_shards" : 1},"mappings" : {"type1" : {"_source" : { "enabled" : false },"properties" : {"field1" : { "type" : "string", "index" : "not_analyzed" }}}}}' |> IO.iodata_to_binary
-    conn = conn(:post, "/index", settings, headers: authenticate_headers)
-    conn = FunnelHttp.Router.call(conn, @opts)
-
-    {:ok, response} = JSEX.decode(conn.resp_body)
-    index_id = response["index_id"]
-
-    conn = conn(:delete, "/index/#{index_id}")
-    conn = FunnelHttp.Router.call(conn, @opts)
-
-    {:ok, response} = JSEX.decode(conn.resp_body)
-
-    assert conn.state == :sent
-    assert conn.status == 400
-    assert conn.assigns[:token] == nil
-    assert response["error"] == "Unauthenticated"
-    Funnel.Es.destroy(index_id)
-  end
-
   test "does not allow to create a query without token" do
     query = '{"query" : {"match" : {"message" : "elasticsearch"}}}' |> IO.iodata_to_binary
-    conn = conn(:post, "/index/index_id/queries", query, headers: headers)
+    conn = conn(:post, "/queries", query, headers: headers)
     conn = FunnelHttp.Router.call(conn, @opts)
 
     {:ok, response} = JSEX.decode(conn.resp_body)
@@ -167,7 +72,7 @@ defmodule FunnelHttpTest do
 
   test "does not allow to create a query without `query` and `metadata` keys" do
     query = '{"query" : {"match" : {"message" : "elasticsearch"}}}' |> IO.iodata_to_binary
-    conn = conn(:post, "/index/index_id/queries", query, headers: authenticate_headers)
+    conn = conn(:post, "/queries", query, headers: authenticate_headers)
     conn = FunnelHttp.Router.call(conn, @opts)
 
     {:ok, response} = JSEX.decode(conn.resp_body)
@@ -179,32 +84,24 @@ defmodule FunnelHttpTest do
   end
 
   test "allow to create a query with token, and settings forwarding" do
-    settings = '{"settings" : {"number_of_shards" : 1},"mappings" : {"type1" : {"_source" : { "enabled" : false },"properties" : {"field1" : { "type" : "string", "index" : "not_analyzed" }}}}}' |> IO.iodata_to_binary
-    conn = conn(:post, "/index", settings, headers: authenticate_headers)
-    conn = FunnelHttp.Router.call(conn, @opts)
-
-    {:ok, response} = JSEX.decode(conn.resp_body)
-    index_id = response["index_id"]
-
     query = '{"query":{"query" : {"match" : {"message" : "elasticsearch"}}}, "metadata":{"name":"Query Creation"}}' |> IO.iodata_to_binary
-    conn = conn(:post, "/index/#{index_id}/queries", query, headers: authenticate_headers)
+    conn = conn(:post, "/queries", query, headers: authenticate_headers)
     conn = FunnelHttp.Router.call(conn, @opts)
 
     {:ok, response} = JSEX.decode(conn.resp_body)
 
     assert conn.state == :sent
     assert conn.status == 201
-    assert response["index_id"] == index_id
     assert response["query_id"] != nil
     assert response["token"] == nil
     assert response["metadata"]["name"] == "Query Creation"
 
-    Funnel.Es.destroy(index_id)
+    Funnel.Es.destroy("queries")
   end
 
   test "does not allow to update a query without token" do
     query = '{"query" : {"match" : {"message" : "elasticsearch"}}}' |> IO.iodata_to_binary
-    conn = conn(:put, "/index/index_id/queries/:query_id", query, headers: headers)
+    conn = conn(:put, "/queries/:query_id", query, headers: headers)
     conn = FunnelHttp.Router.call(conn, @opts)
 
     {:ok, response} = JSEX.decode(conn.resp_body)
@@ -216,37 +113,29 @@ defmodule FunnelHttpTest do
   end
 
   test "allow to update a query with token" do
-    settings = '{"settings" : {"number_of_shards" : 1},"mappings" : {"type1" : {"_source" : { "enabled" : false },"properties" : {"field1" : { "type" : "string", "index" : "not_analyzed" }}}}}' |> IO.iodata_to_binary
-    conn = conn(:post, "/index", settings, headers: authenticate_headers)
-    conn = FunnelHttp.Router.call(conn, @opts)
-
-    {:ok, response} = JSEX.decode(conn.resp_body)
-    index_id = response["index_id"]
-
     query = '{"query":{"query" : {"match" : {"message" : "elasticsearch"}}}, "metadata":{"name":"Query Update"}}' |> IO.iodata_to_binary
-    conn = conn(:post, "/index/#{index_id}/queries", query, headers: authenticate_headers)
+    conn = conn(:post, "/queries", query, headers: authenticate_headers)
     conn = FunnelHttp.Router.call(conn, @opts)
     {:ok, response} = JSEX.decode(conn.resp_body)
     query_id = response["query_id"]
 
     query = '{"query":{"query" : {"match" : {"message" : "update"}}}, "metadata":{"name":"Query Update 2"}}' |> IO.iodata_to_binary
-    conn = conn(:put, "/index/#{index_id}/queries/#{query_id}", query, headers: authenticate_headers)
+    conn = conn(:put, "/queries/#{query_id}", query, headers: authenticate_headers)
     conn = FunnelHttp.Router.call(conn, @opts)
     {:ok, response} = JSEX.decode(conn.resp_body)
 
     assert conn.state == :sent
     assert conn.status == 200
-    assert response["index_id"] == index_id
     assert response["query_id"] == query_id
     assert response["metadata"]["name"] == "Query Update 2"
     assert response["token"] == nil
 
-    Funnel.Es.destroy(index_id)
+    Funnel.Es.destroy("queries")
   end
 
   test "does not allow to destroy a query without token" do
     query = '{"query" : {"match" : {"message" : "elasticsearch"}}}' |> IO.iodata_to_binary
-    conn = conn(:delete, "/index/index_id/queries/:query_id", query, headers: headers)
+    conn = conn(:delete, "/queries/:query_id", query, headers: headers)
     conn = FunnelHttp.Router.call(conn, @opts)
 
     {:ok, response} = JSEX.decode(conn.resp_body)
@@ -258,20 +147,13 @@ defmodule FunnelHttpTest do
   end
 
   test "allow to destroy a query with token" do
-    settings = '{"settings" : {"number_of_shards" : 1},"mappings" : {"type1" : {"_source" : { "enabled" : false },"properties" : {"field1" : { "type" : "string", "index" : "not_analyzed" }}}}}' |> IO.iodata_to_binary
-    conn = conn(:post, "/index", settings, headers: authenticate_headers)
-    conn = FunnelHttp.Router.call(conn, @opts)
-
-    {:ok, response} = JSEX.decode(conn.resp_body)
-    index_id = response["index_id"]
-
     query = '{"query":{"query" : {"match" : {"message" : "update"}}}, "metadata":{"name":"Query Update 2"}}' |> IO.iodata_to_binary
-    conn = conn(:post, "/index/#{index_id}/queries", query, headers: authenticate_headers)
+    conn = conn(:post, "/queries", query, headers: authenticate_headers)
     conn = FunnelHttp.Router.call(conn, @opts)
     {:ok, response} = JSEX.decode(conn.resp_body)
     query_id = response["query_id"]
 
-    conn = conn(:delete, "/index/#{index_id}/queries/#{query_id}", [], headers: authenticate_headers)
+    conn = conn(:delete, "/queries/#{query_id}", [], headers: authenticate_headers)
     conn = FunnelHttp.Router.call(conn, @opts)
     {:ok, response} = JSEX.decode(conn.resp_body)
 
@@ -280,45 +162,25 @@ defmodule FunnelHttpTest do
     assert response["token"] == nil
     assert FunnelHttp.Query.Registry.find(query_id) == {:not_found, query_id, nil}
 
-    Funnel.Es.destroy(index_id)
+    Funnel.Es.destroy("queries")
   end
 
   test "submit a document to the percolator" do
-    settings = '{"settings" : {"number_of_shards" : 1},"mappings" : {"type1" : {"_source" : { "enabled" : false },"properties" : {"field1" : { "type" : "string", "index" : "not_analyzed" }}}}}' |> IO.iodata_to_binary
     message = "{\"doc\":{\"message\":\"this new elasticsearch percolator feature is nice, borat style\"}}"
-
-    conn = conn(:post, "/index", settings, headers: authenticate_headers)
-    conn = FunnelHttp.Router.call(conn, @opts)
-
-    {:ok, response} = JSEX.decode(conn.resp_body)
-    index_id = response["index_id"]
-
-    conn = conn(:post, "/index/#{index_id}/feeding", message, headers: authenticate_headers)
+    conn = conn(:post, "/feeding", message, headers: authenticate_headers)
     conn = FunnelHttp.Router.call(conn, @opts)
 
     assert conn.state == :sent
     assert conn.status == 204
-
-    Funnel.Es.destroy(index_id)
   end
 
   test "submit a list of documents to the percolator" do
-    settings = '{"settings" : {"number_of_shards" : 1},"mappings" : {"type1" : {"_source" : { "enabled" : false },"properties" : {"field1" : { "type" : "string", "index" : "not_analyzed" }}}}}' |> IO.iodata_to_binary
     messages = "[{\"doc\" : {\"message\":\"So long, and thanks for all the fish\"}},{\"doc\":{\"message\":\"Say thanks to the fish\"}}]"
-
-    conn = conn(:post, "/index", settings, headers: authenticate_headers)
-    conn = FunnelHttp.Router.call(conn, @opts)
-
-    {:ok, response} = JSEX.decode(conn.resp_body)
-    index_id = response["index_id"]
-
-    conn = conn(:post, "/index/#{index_id}/feeding", messages, headers: authenticate_headers)
+    conn = conn(:post, "/feeding", messages, headers: authenticate_headers)
     conn = FunnelHttp.Router.call(conn, @opts)
 
     assert conn.state == :sent
     assert conn.status == 204
-
-    Funnel.Es.destroy(index_id)
   end
 
   test "river without a token" do
@@ -375,17 +237,6 @@ defmodule FunnelHttpTest do
     assert Enum.count(response) == 0
   end
 
-  test "find queries with a token, but with on a fake index" do
-    conn = conn(:get, "/index/doesnotexists/queries", "", headers: authenticate_headers)
-    conn = FunnelHttp.Router.call(conn, @opts)
-
-    {:ok, response} = JSEX.decode(conn.resp_body)
-
-    assert conn.state == :sent
-    assert conn.status == 404
-    assert Enum.count(response) == 0
-  end
-
   test "find queries based on token" do
     query = '{"query" : {"term" : {"field1" : "value1"}}}' |> IO.iodata_to_binary
     token = "query_find"
@@ -433,40 +284,5 @@ defmodule FunnelHttpTest do
     assert conn.state == :sent
     assert conn.status == 200
     Funnel.Es.destroy("several_indexes")
-  end
-
-  test "find queries for a given index without a token" do
-    conn = conn(:get, "/index/index_id/queries", "", headers: headers)
-    conn = FunnelHttp.Router.call(conn, @opts)
-
-    {:ok, response} = JSEX.decode(conn.resp_body)
-
-    assert conn.state == :sent
-    assert conn.status == 400
-    assert response["token"] == nil
-    assert response["error"] == "Unauthenticated"
-  end
-
-  test "find queries based on token for a given index" do
-    query = '{"query" : {"term" : {"field1" : "value1"}}}' |> IO.iodata_to_binary
-    token = "query_find_mono_index"
-    Funnel.Es.register("mono_index", token, query)
-    {_status, response} = Funnel.Es.register("funneler", token, query)
-    {:ok, body} = JSEX.decode response
-    query_id =  body["query_id"]
-    metadata = %{"name" => "Plop"}
-    FunnelHttp.Query.Registry.insert(query_id, metadata)
-    Funnel.Es.refresh
-
-    conn = conn(:get, "/index/funneler/queries?token=#{token}", "", headers: authenticate_headers)
-    conn = FunnelHttp.Router.call(conn, @opts)
-
-    {:ok, response} = JSEX.decode(conn.resp_body)
-
-    assert Enum.count(response) == 1
-    assert conn.state == :sent
-    assert conn.status == 200
-    Funnel.Es.destroy("mono_index")
-    Funnel.Es.destroy("funneler")
   end
 end

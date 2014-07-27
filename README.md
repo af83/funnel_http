@@ -53,26 +53,6 @@ examples:
 -H "Content-Type: application/json" -H "Accept: application/json" -H "Authorization: 7d0ac81fbdd646dd9e883e3b007ce58d"
 ```
 
-### Index
-
-Ok, now, let's create an index:
-
-``` shell
-curl -XPOST "http://localhost:4000/index" -d '{"settings" : {"number_of_shards" : 1},"mappings" : {"type1" : {"_source" : {"enabled" : false},"properties" :{"field1":{"type":"string","index":"not_analyzed"}}}}}'
-```
-``` json
-{"index_id":"bfa3e5b02e554b458165815968ed490b","body":{"ok":true,"acknowledged":true}}
-```
-
-An index can be destroy:
-
-``` shell
-curl -XDELETE "http://localhost:4000/index/bfa3e5b02e554b458165815968ed490b"
-```
-``` json
-{"found":true,"_index":"ed78ca7c475449a59fa70ecc90ea0634_dev","_type":".percolator","_id":"0f415001bc774a129921c4d929e3cd7c-14e8a26c56d04db2a1829d289ca7e91c","_version":3}
-```
-
 ### Query
 
 #### Adding query
@@ -85,26 +65,26 @@ A query is defined by a user's token, a set of metadata, and the elasticsearch
 query. `metadata` and `query` are mandatory.
 
 ``` shell
-curl -XPOST "http://localhost:4000/index/bfa3e5b02e554b458165815968ed490b/queries" -d '{"query":{query" : {"term" : {"field1" : "value1"}}}, "metadata":{"name":"Awesome Query"}}'
+curl -XPOST "http://localhost:4000/queries" -d '{"query":{query" : {"term" : {"field1" : "value1"}}}, "metadata":{"name":"Awesome Query"}}'
 ```
 ``` json
-{"query_id":"c4d92d29273a4bec9618c65c3c33e9db","index_id":"ed78ca7c475449a59fa70ecc90ea0634","metadata":{"name":"Awesome Query"}}
+{"query_id":"c4d92d29273a4bec9618c65c3c33e9db","metadata":{"name":"Awesome Query"}}
 ```
 
 #### Updating a query
 
 ``` shell
-curl -XPOST "http://localhost:4000/index/bfa3e5b02e554b458165815968ed490b/queries/c4d92d29273a4bec9618c65c3c33e9db" -d '{"query":{"query" : {"term" : {"field1" : "value1"}}},"metadata":{"name":"Awesome Query"}}'
+curl -XPOST "http://localhost:4000/queries/c4d92d29273a4bec9618c65c3c33e9db" -d '{"query":{"query" : {"term" : {"field1" : "value1"}}},"metadata":{"name":"Awesome Query"}}'
 ```
 
 ``` json
-{"query_id":"c4d92d29273a4bec9618c65c3c33e9db","index_id":"ed78ca7c475449a59fa70ecc90ea0634","metadata":{"name":"Awesome Query"}}
+{"query_id":"c4d92d29273a4bec9618c65c3c33e9db","metadata":{"name":"Awesome Query"}}
 ```
 
 #### Deleting a query
 
 ``` shell
-curl -XDELETE "http://localhost:4000/index/bfa3e5b02e554b458165815968ed490b/queries/c4d92d29273a4bec9618c65c3c33e9db"
+curl -XDELETE "http://localhost:4000/queries/c4d92d29273a4bec9618c65c3c33e9db"
 ```
 
 ``` json
@@ -113,22 +93,13 @@ curl -XDELETE "http://localhost:4000/index/bfa3e5b02e554b458165815968ed490b/quer
 
 #### Searching queries
 
-Queries can be retrieved for a given `index_id` with the following:
-
-``` shell
-curl -XGET "http://localhost:4000/index/bfa3e5b02e554b458165815968ed490b/queries"
-```
-``` json
-[{"query_id":"c4d92d29273a4bec9618c65c3c33e9db","index_id":"ed78ca7c475449a59fa70ecc90ea0634","metadata":{"name":"Awesome Query"}}]
-```
-
 Queries can be retrieved for a given `token` with the following:
 
 ``` shell
 curl -XGET "http://localhost:4000/queries"
 ```
 ``` json
-[{"query_id":"c4d92d29273a4bec9618c65c3c33e9db","index_id":"ed78ca7c475449a59fa70ecc90ea0634","metadata":{"name":"Awesome Query"}]
+[{"query_id":"c4d92d29273a4bec9618c65c3c33e9db","metadata":{"name":"Awesome Query"}]
 ```
 
 ### Submiting documents
@@ -138,7 +109,7 @@ comply with the funnel's message serialization.
 
 
 ``` shell
-curl -XPOST "http://localhost:4000/index/bfa3e5b02e554b458165815968ed490b/feeding" -d '{"doc":{"field1" : "value1"}}'
+curl -XPOST "http://localhost:4000/feeding" -d '{"doc":{"field1" : "value1"}}'
 ```
 
 ### Streaming
