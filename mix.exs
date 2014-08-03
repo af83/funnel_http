@@ -12,7 +12,7 @@ defmodule FunnelHttp.Mixfile do
   #
   # Type `mix help compile.app` for more information
   def application do
-    [applications: [:cowboy, :plug, :funnel],
+    [applications: [:cowboy, :plug, :funnel, :logger],
      mod: {FunnelHttp, []}]
   end
 
@@ -20,7 +20,6 @@ defmodule FunnelHttp.Mixfile do
     [
       {:cowboy,               github: "extend/cowboy"},
       {:plug,                 "~> 0.5"},
-      {:timex,                "~> 0.10"},
       {:funnel,               "~> 0.1"},
       {:httpotion,            github: "myfreeweb/httpotion"},
       {:uuid,                 github: "travis/erlang-uuid"},

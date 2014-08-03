@@ -1,6 +1,7 @@
 defmodule FunnelHttp.Router do
   import Plug.Conn
   use Plug.Router
+  require Logger
 
   plug :match
   plug :dispatch
@@ -192,7 +193,6 @@ defmodule FunnelHttp.Router do
 
   defp log(conn, status) do
     path = Enum.join(conn.path_info, "/")
-    date = Timex.Date.now |> Timex.DateFormat.format!("{ISO}")
-    IO.inspect("[#{date}] Respond to #{path} with #{status} code")
+    Logger.info "Respond to #{path} with #{status} code"
   end
 end
