@@ -18,7 +18,7 @@ defmodule FunnelHttp.Mixfile do
 
   defp deps do
     [
-      {:cowboy,               github: "extend/cowboy"},
+      {:cowboy,               "~> 1.0"},
       {:plug,                 "~> 0.5"},
       {:funnel,               "~> 0.1"},
       {:httpotion,            github: "myfreeweb/httpotion"},
