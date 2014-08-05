@@ -1,4 +1,4 @@
-# Funnel
+# FunnelHttp
 
 [![Build Status](https://travis-ci.org/AF83/funnel_http.png?branch=master)](https://travis-ci.org/AF83/funnel_http)
 
