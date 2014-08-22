@@ -1,13 +1,13 @@
 %{"cowboy": {:package, "1.0.0"},
   "cowlib": {:package, "1.0.0"},
   "event_source_encoder": {:package, "0.0.2"},
-  "funnel": {:package, "0.2.1"},
-  "hackney": {:git, "git://github.com/benoitc/hackney.git", "fd2158b39b0aa139bb90f0c867f246ddfec072e6", [tag: "0.13.0"]},
-  "httpoison": {:package, "0.3.2"},
-  "idna": {:git, "git://github.com/benoitc/erlang-idna.git", "21aa158b7f36bf2a000f12fe40d7f21eece9cf65", [tag: "hackney-0.11.2"]},
+  "funnel": {:package, "0.3.0"},
+  "hackney": {:package, "0.13.1"},
+  "httpoison": {:package, "0.4.1"},
+  "idna": {:package, "1.0.1"},
   "jsex": {:package, "2.0.0"},
   "jsx": {:package, "2.0.4"},
   "plug": {:package, "0.5.3"},
   "poolboy": {:package, "1.3.0"},
   "ranch": {:package, "1.0.0"},
-  "uuid": {:package, "0.1.4"}}
+  "uuid": {:package, "0.1.5"}}

@@ -21,7 +21,6 @@ defmodule FunnelHttp.Mixfile do
       {:cowboy,               "~> 1.0"},
       {:plug,                 "~> 0.5"},
       {:funnel,               "~> 0.1"},
-      {:hackney,              github: "benoitc/hackney", tag: "0.13.0" },
       {:event_source_encoder, "~> 0.0.1"}
     ]
   end

@@ -21,4 +21,9 @@
 # [dep1: [key: :value],
 #  dep2: [key: :value]]
 
-[]
+use Mix.Config
+
+config :funnel,
+  es_host: "http://localhost:9200",
+  percolator_pool_size: 100,
+  percolator_pool_max_overflow: 1000
