@@ -204,14 +204,15 @@ defmodule FunnelHttpTest do
   end
 
   test "river with a token and send a message" do
-    conn = conn(:get, "/river", "", headers: authenticate_headers)
+    conn = conn(:get, "/river", "", headers: authenticate_headers("river"))
     conn = FunnelHttp.Router.call(conn, @opts)
 
     assert conn.status == 200
     assert conn.state == :chunked
 
     message = "{\"doc\":{\"message\":\"this new elasticsearch percolator feature is nice, borat style\"}}"
-    Funnel.Transistor.notify("river", Funnel.Uuid.generate, message)
+    response = %{query_ids: [], body: message}
+    Funnel.Transistor.notify("river", Funnel.Uuid.generate, response)
   end
 
   test "find queries without a token" do
