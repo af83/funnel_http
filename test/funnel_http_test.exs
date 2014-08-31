@@ -27,7 +27,7 @@ defmodule FunnelHttpTest do
     conn = conn(:post, "/ohai")
     conn = FunnelHttp.Router.call(conn, @opts)
 
-    {:ok, response} = JSEX.decode(conn.resp_body)
+    {:ok, response} = Poison.decode(conn.resp_body)
 
     assert conn.state == :sent
     assert conn.status == 404
@@ -38,7 +38,7 @@ defmodule FunnelHttpTest do
   test "status" do
     conn = conn(:get, "/status")
     conn = FunnelHttp.Router.call(conn, @opts)
-    {:ok, response} = JSEX.decode(conn.resp_body)
+    {:ok, response} = Poison.decode(conn.resp_body)
 
     assert conn.state == :sent
     assert conn.status == 200
@@ -50,7 +50,7 @@ defmodule FunnelHttpTest do
     conn = conn(:post, "/register")
     conn = FunnelHttp.Router.call(conn, @opts)
 
-    {:ok, response} = JSEX.decode(conn.resp_body)
+    {:ok, response} = Poison.decode(conn.resp_body)
 
     assert conn.state == :sent
     assert conn.status == 201
@@ -62,7 +62,7 @@ defmodule FunnelHttpTest do
     conn = conn(:post, "/queries", query, headers: headers)
     conn = FunnelHttp.Router.call(conn, @opts)
 
-    {:ok, response} = JSEX.decode(conn.resp_body)
+    {:ok, response} = Poison.decode(conn.resp_body)
 
     assert conn.state == :sent
     assert conn.status == 400
@@ -75,7 +75,7 @@ defmodule FunnelHttpTest do
     conn = conn(:post, "/queries", query, headers: authenticate_headers)
     conn = FunnelHttp.Router.call(conn, @opts)
 
-    {:ok, response} = JSEX.decode(conn.resp_body)
+    {:ok, response} = Poison.decode(conn.resp_body)
 
     assert conn.state == :sent
     assert conn.status == 422
@@ -88,7 +88,7 @@ defmodule FunnelHttpTest do
     conn = conn(:post, "/queries", query, headers: authenticate_headers)
     conn = FunnelHttp.Router.call(conn, @opts)
 
-    {:ok, response} = JSEX.decode(conn.resp_body)
+    {:ok, response} = Poison.decode(conn.resp_body)
 
     assert conn.state == :sent
     assert conn.status == 201
@@ -104,7 +104,7 @@ defmodule FunnelHttpTest do
     conn = conn(:put, "/queries/:query_id", query, headers: headers)
     conn = FunnelHttp.Router.call(conn, @opts)
 
-    {:ok, response} = JSEX.decode(conn.resp_body)
+    {:ok, response} = Poison.decode(conn.resp_body)
 
     assert conn.state == :sent
     assert conn.status == 400
@@ -116,13 +116,13 @@ defmodule FunnelHttpTest do
     query = '{"query":{"query" : {"match" : {"message" : "elasticsearch"}}}, "metadata":{"name":"Query Update"}}' |> IO.iodata_to_binary
     conn = conn(:post, "/queries", query, headers: authenticate_headers)
     conn = FunnelHttp.Router.call(conn, @opts)
-    {:ok, response} = JSEX.decode(conn.resp_body)
+    {:ok, response} = Poison.decode(conn.resp_body)
     query_id = response["query_id"]
 
     query = '{"query":{"query" : {"match" : {"message" : "update"}}}, "metadata":{"name":"Query Update 2"}}' |> IO.iodata_to_binary
     conn = conn(:put, "/queries/#{query_id}", query, headers: authenticate_headers)
     conn = FunnelHttp.Router.call(conn, @opts)
-    {:ok, response} = JSEX.decode(conn.resp_body)
+    {:ok, response} = Poison.decode(conn.resp_body)
 
     assert conn.state == :sent
     assert conn.status == 200
@@ -138,7 +138,7 @@ defmodule FunnelHttpTest do
     conn = conn(:delete, "/queries/:query_id", query, headers: headers)
     conn = FunnelHttp.Router.call(conn, @opts)
 
-    {:ok, response} = JSEX.decode(conn.resp_body)
+    {:ok, response} = Poison.decode(conn.resp_body)
 
     assert conn.state == :sent
     assert conn.status == 400
@@ -150,12 +150,12 @@ defmodule FunnelHttpTest do
     query = '{"query":{"query" : {"match" : {"message" : "update"}}}, "metadata":{"name":"Query Update 2"}}' |> IO.iodata_to_binary
     conn = conn(:post, "/queries", query, headers: authenticate_headers)
     conn = FunnelHttp.Router.call(conn, @opts)
-    {:ok, response} = JSEX.decode(conn.resp_body)
+    {:ok, response} = Poison.decode(conn.resp_body)
     query_id = response["query_id"]
 
     conn = conn(:delete, "/queries/#{query_id}", [], headers: authenticate_headers)
     conn = FunnelHttp.Router.call(conn, @opts)
-    {:ok, response} = JSEX.decode(conn.resp_body)
+    {:ok, response} = Poison.decode(conn.resp_body)
 
     assert conn.state == :sent
     assert conn.status == 200
@@ -187,7 +187,7 @@ defmodule FunnelHttpTest do
     conn = conn(:get, "/river", [], headers: headers)
     conn = FunnelHttp.Router.call(conn, @opts)
 
-    {:ok, response} = JSEX.decode(conn.resp_body)
+    {:ok, response} = Poison.decode(conn.resp_body)
 
     assert conn.state == :sent
     assert conn.status == 400
@@ -218,7 +218,7 @@ defmodule FunnelHttpTest do
     conn = conn(:get, "/queries", "", headers: headers)
     conn = FunnelHttp.Router.call(conn, @opts)
 
-    {:ok, response} = JSEX.decode(conn.resp_body)
+    {:ok, response} = Poison.decode(conn.resp_body)
 
     assert conn.state == :sent
     assert conn.status == 400
@@ -230,7 +230,7 @@ defmodule FunnelHttpTest do
     conn = conn(:get, "/queries", "", headers: authenticate_headers)
     conn = FunnelHttp.Router.call(conn, @opts)
 
-    {:ok, response} = JSEX.decode(conn.resp_body)
+    {:ok, response} = Poison.decode(conn.resp_body)
 
     assert conn.state == :sent
     assert conn.status == 200
@@ -241,7 +241,7 @@ defmodule FunnelHttpTest do
     query = '{"query" : {"term" : {"field1" : "value1"}}}' |> IO.iodata_to_binary
     token = "query_find"
     {_status, response} = Funnel.Es.register("funnel", token, query)
-    {:ok, body} = JSEX.decode response
+    {:ok, body} = Poison.decode response
     query_id =  body["query_id"]
     metadata = %{"name" => "Plop"}
     FunnelHttp.Query.Registry.insert(query_id, metadata)
@@ -250,7 +250,7 @@ defmodule FunnelHttpTest do
     conn = conn(:get, "/queries?token=#{token}", "", headers: authenticate_headers)
     conn = FunnelHttp.Router.call(conn, @opts)
 
-    {:ok, response} = JSEX.decode(conn.resp_body)
+    {:ok, response} = Poison.decode(conn.resp_body)
     query = List.first(response)
 
     assert Enum.count(response) == 1
@@ -264,12 +264,12 @@ defmodule FunnelHttpTest do
     query = '{"query" : {"term" : {"field1" : "value1"}}}' |> IO.iodata_to_binary
     token = "query_find"
     {_status, response} = Funnel.Es.register("several_indexes", token, query)
-    {:ok, body} = JSEX.decode response
+    {:ok, body} = Poison.decode response
     query_id =  body["query_id"]
     metadata = %{"name" => "Plop"}
     FunnelHttp.Query.Registry.insert(query_id, metadata)
     {_status, response} = Funnel.Es.register("funnel", token, query)
-    {:ok, body} = JSEX.decode response
+    {:ok, body} = Poison.decode response
     query_id =  body["query_id"]
     metadata = %{"name" => "Plop"}
     FunnelHttp.Query.Registry.insert(query_id, metadata)
@@ -278,7 +278,7 @@ defmodule FunnelHttpTest do
     conn = conn(:get, "/queries", "", headers: authenticate_headers(token))
     conn = FunnelHttp.Router.call(conn, @opts)
 
-    {:ok, response} = JSEX.decode(conn.resp_body)
+    {:ok, response} = Poison.decode(conn.resp_body)
 
     assert Enum.count(response) == 2
     assert conn.state == :sent

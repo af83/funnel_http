@@ -72,7 +72,7 @@ defmodule FunnelHttp.Router do
   end
 
   defp respond_with({:ok, conn}, status, response) do
-    {:ok, body} = JSEX.encode(response)
+    {:ok, body} = Poison.encode(response)
     log(conn, status)
     send_resp(conn, status, body)
   end
@@ -85,7 +85,7 @@ defmodule FunnelHttp.Router do
 
   defp respond_with({:ok, conn}, :status) do
     %{body: body, headers: _headers, status_code: status_code} = Funnel.Es.get("/")
-    {:ok, body} = JSEX.decode(body)
+    {:ok, body} = Poison.decode(body)
     respond_with({:ok, conn}, status_code, body)
   end
 
@@ -96,7 +96,7 @@ defmodule FunnelHttp.Router do
   end
 
   defp respond_with({:ok, conn}, :query_creation) do
-    {:ok, body} = JSEX.encode(conn.assigns[:payload]["query"])
+    {:ok, body} = Poison.encode(conn.assigns[:payload]["query"])
     {:ok, status_code, body} = Funnel.Query.create("queries", conn.assigns[:token], body)
     {:ok, _id, metadata} = FunnelHttp.Query.Registry.insert(body["query_id"], conn.assigns[:payload]["metadata"])
     body = %{:query_id => body["query_id"], :metadata => metadata}
@@ -104,7 +104,7 @@ defmodule FunnelHttp.Router do
   end
 
   defp respond_with({:ok, conn}, :query_update) do
-    {:ok, body} = JSEX.encode(conn.assigns[:payload]["query"])
+    {:ok, body} = Poison.encode(conn.assigns[:payload]["query"])
     {:ok, status_code, body} = Funnel.Query.update("queries", conn.assigns[:token], conn.assigns[:query_id], body)
     {:ok, _id, metadata} = FunnelHttp.Query.Registry.insert(body["query_id"], conn.assigns[:payload]["metadata"])
     body = %{:query_id => body["query_id"], :metadata => metadata}
@@ -139,17 +139,17 @@ defmodule FunnelHttp.Router do
   end
 
   defp respond_with({:ok, conn}, :not_found) do
-    {:ok, response} = JSEX.encode([error: "Not found"])
+    {:ok, response} = Poison.encode(%{error: "Not found"})
     send_resp(conn, 404, response)
   end
 
   defp respond_with({:unauthenticated, conn}, _method) do
-    {:ok, response} = JSEX.encode([error: "Unauthenticated"])
+    {:ok, response} = Poison.encode(%{error: "Unauthenticated"})
     send_resp(conn, 400, response)
   end
 
   defp respond_with({:invalid, conn, message}, _method) do
-    {:ok, response} = JSEX.encode([error: message])
+    {:ok, response} = Poison.encode(%{error: message})
     log(conn, 422)
     send_resp(conn, 422, response)
   end
@@ -164,7 +164,7 @@ defmodule FunnelHttp.Router do
 
   defp validate({:ok, conn}, :query) do
     {:ok, body, conn} = read_body(conn)
-    {:ok, payload} = JSEX.decode(body)
+    {:ok, payload} = Poison.decode(body)
     case payload["query"] && payload["metadata"] do
       nil -> {:invalid, conn, "`query` and `metadata` keys must be present."}
       _   -> {:ok, assign(conn, :payload, payload)}

@@ -4,7 +4,7 @@ defimpl Funnel.Transport, for: Elixir.Plug.Conn do
   def write(conn, %{:id => id, :item => item}) do
     queries = Enum.map(item[:query_ids], &to_query/1)
     item = %{queries: queries, body: item[:body]}
-    {:ok, item} = JSEX.encode(item)
+    {:ok, item} = Poison.encode(item)
 
     chunk conn, EventSourceEncoder.encode(id, item, "newItem")
   end

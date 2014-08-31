@@ -4,7 +4,7 @@ defmodule FunnelHttp.Mixfile do
   def project do
     [app: :funnel_http,
      version: "0.0.1",
-     elixir: "~> 0.15",
+     elixir: "~> 0.15 or ~> 1.0.0-rc1",
      deps: deps]
   end
 
